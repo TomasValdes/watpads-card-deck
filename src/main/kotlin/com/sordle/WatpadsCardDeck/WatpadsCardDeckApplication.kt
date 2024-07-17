@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class WatpadsCardDeckApplication
 
 fun main(args: Array<String>) {
-	runApplication<WatpadsCardDeckApplication>(*args)
+	runApplication<WatpadsCardDeckApplication>(*hj)
 }
