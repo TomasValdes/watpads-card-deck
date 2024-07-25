@@ -1,40 +1,25 @@
 # Requirements and Specification Document
 
 ### Project Abstract
+This project will be an online multiplayer variation of rock paper scissors. We decided that we wanted to make a trick based rock paper scissors game. We also wanted an easily accessible game that anyone could play and wouldn't be that hard to learn. We decided that a web app would make the game very accessible to our audience.
 
-<!--A one paragraph summary of what the software will do.-->
-
-This is an example paragraph written in markdown. You can use *italics*, **bold**, and other formatting options. You can also <u>use inline html</u> to format your text. The example sections included in this document are not necessarily all the sections you will want, and it is possible that you won't use all the one's provided. It is your responsibility to create a document that adequately conveys all the information about your project specifications and requirements.
-
-Please view this file's source to see `<!--comments-->` with guidance on how you might use the different sections of this document.
+The rules of the game are fairly simple. Each player decides three cards that will go in the deck, the players can pick any combination of Rock, Paper, and Scissors. In addition this the user picks which card they plan on winning with. Then the deck is shuffled and three cards are distributed to the players at random. If
 
 ### Customer
 
-<!--A brief description of the customer for this software, both in general (the population who might eventually use such a system) and specifically for this document (the customer(s) who informed this document). Every project will have a customer from the CS506 instructional staff. Requirements should not be derived simply from discussion among team members. Ideally your customer should not only talk to you about requirements but also be excited later in the semester to use the system.-->
+The customer of this project will be any user who wants to play a fun online game with their friends.
 
 ### User Requirements
 
-<!--This section lists the behavior that the users see. This information needs to be presented in a logical, organized fashion. It is most helpful if this section is organized in outline form: a bullet list of major topics (e.g., one for each kind of user, or each major piece of system functionality) each with some number of subtopics.-->
+| ID  | Description                                                                                                   | Priority | Status |
+| --- | ------------------------------------------------------------------------------------------------------------- | -------- | ------ |
+| R1  | Users should not have to sign into the system; their current network login should be used for identification. | Med      | Open   |
+| R2  | The user should be able to access the game from any full sized computer                                       | High     | Open   |
+| R3  | The user should be able to access the game from mobile                                                        | Low      | Open   |
+| R4  | The user should be able to play the game against other people                                                 | Med      | Open   |
+| R5  | The user should be able to play against a bot                                                                 | High     | Open   |
+| R6  | A user should be able to interact with the game via a UI                                                      | High     | Open   |
 
-Here is a user requirements sample from [Crookshanks](https://learning-oreilly-com.ezproxy.library.wisc.edu/library/view/practical-software-development/9781484206201/9781484206218_Ch02.xhtml):
-
-| ID   | Description                                                  | Priority | Status |
-| ---- | ------------------------------------------------------------ | -------- | ------ |
-| R11  | Users should not have to sign into the system; their current network login should be used for identification. | Med      | Done   |
-| R12  | The user should pick a project first; the tasks available are a derivative of the project. | High     | Open   |
-| R13  | A full-time employee should not be able to submit a time card with less than 40 hours per week recorded. | High     | Open   |
-| R14  | A contractor can submit any number of hours up to 60 without special approval. | Med      | Open   |
-| R15  | A team lead can see his/her team's time cards before they are submitted but cannot approve them until the user submits it. | High     | Open   |
-
-<div align="center"><small><i>Excerpt from Crookshanks Table 2-2 showing example user requirements for a timekeeping system</i></small></div>
-
-- You
-    - Can
-        - Use
-- Bullet
-    - Points
-        - In
-        - Markdown
 
 ### Use Cases & User Stories
 
@@ -53,25 +38,15 @@ Here is a sample user story from [Clean Agile](https://learning-oreilly-com.ezpr
 
 ### User Interface Requirements
 
-<!--Describes any customer user interface requirements including graphical user interface requirements as well as data exchange format requirements. This also should include necessary reporting and other forms of human readable input and output. This should focus on how the feature or product and user interact to create the desired workflow. Describing your intended interface as “easy” or “intuitive” will get you nowhere unless it is accompanied by details.-->
-
-<!--NOTE: Please include illustrations or screenshots of what your user interface would look like -- even if they’re rough -- and interleave it with your description.-->
-
-Images can be included with `![alt_text](image_path)`
+The UI should be easy to use and should be accessible. For us accessible looks like an easy to understand icon which, when clicked, reveals a message to the user detailing how to play the game and navigate the webiste.
 
 ### Security Requirements
 
-<!--Discuss what security requirements are necessary and why. Are there privacy or confidentiality issues? Is your system vulnerable to denial-of-service attacks?-->
+Ideally we would have an OATH system
 
 ### System Requirements
 
-<!--List here all of the external entities, other than users, on which your system will depend. For example, if your system inter-operates with sendmail, or if you will depend on Apache for the web server, or if you must target both Unix and Windows, list those requirements here. List also memory requirements, performance/speed requirements, data capacity requirements, if applicable.-->
-
-| You    |    can    |    also |
-| ------ | :-------: | ------: |
-| change |    how    | columns |
-| are    | justified |         |
-
+Due to our goal of making this game as accessible as possible we will want this to be able to run on any web browser capable desktop. Our stretch goal is to have this app working on mobile.
 ### Specification
 
 <!--A detailed specification of the system. UML, or other diagrams, such as finite automata, or other appropriate specification formalisms, are encouraged over natural language.-->
@@ -83,9 +58,6 @@ Images can be included with `![alt_text](image_path)`
 You can make headings at different levels by writing `# Heading` with the number of `#` corresponding to the heading level (e.g. `## h2`).
 
 #### Technology Stack
-
-Here are some sample technology stacks that you can use for inspiration:
-
 ```mermaid
 flowchart RL
 subgraph Front End
