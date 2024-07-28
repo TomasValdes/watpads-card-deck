@@ -65,15 +65,15 @@ subgraph Front End
 end
 	
 subgraph Back End
-	B(Java: Spring Boot)
+	B(Kotlin: Spring Boot)
 end
 	
 subgraph Database
-	C[(MySQL)]
+	C[(Cassandra)]
 end
 
-A <-->|"REST API"| B
-B <--> C
+A <-->|"REST API", "WEBSOCKET API"| B
+A <--> |"QUERIES"| C
 ```
 
 #### Database
