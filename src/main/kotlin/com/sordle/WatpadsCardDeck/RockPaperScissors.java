@@ -1,5 +1,3 @@
-package Demo;
-
 import Demo.Models.Player;
 
 import java.util.*;
@@ -104,7 +102,7 @@ public class RockPaperScissors {
 
     switch(game_result) => {
       TIE => {
-	
+		
       },
       P1 => {
 	if (p1.winningCard.equals(p1.move)) {
@@ -121,7 +119,8 @@ public class RockPaperScissors {
 	else {
 	  revealTopCard = true;
 	}
-      }
+      },
+      
     };
 
     if(p1.hand.isEmpty() || p2.hand.isEmpty()) {
