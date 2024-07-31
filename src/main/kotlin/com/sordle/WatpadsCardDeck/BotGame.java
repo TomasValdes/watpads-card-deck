@@ -1,6 +1,7 @@
 import RockPaperScissors.CARDS;
 import RockPaperScissors.GAME_STATE;
 import RockPaperScissors.RESULT;
+import Player;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,8 +57,20 @@ public class BotGame {
     }
   }
 
+  /**
+   * Determines the winner of the game and is dependent on win condition
+   * @return the winner of the game and null if neither player has won yet. updates game state if appropriate to do so
+   */ 
   public Player getWinner() {
+   Player winner = getWinner(player, bot);
+  
+    if (winner.move == winner.winningCard) {
+      state = GAME_STATE.ROUND_RESULTS;
+      winner.score++;
+      return winner;
+    }
     
+   return null;
   }
 
   public RESULT getWinner(Player p1, Player p2) {
@@ -74,13 +87,15 @@ public class BotGame {
      player.move = player.hand.remove(index);
   }
 
-
-
   public List<CARDS> getDraftOptions() {
     return cardOptions;
   }
 
+  public void play_again() {
+    // put data in db here
 
+    state = GAME_STATE.CARD_DRAFT;
+  }
 
 }
 
