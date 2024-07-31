@@ -91,15 +91,35 @@ public class BotGame {
    * @return the winner of the game and null if neither player has won yet. updates game state if appropriate to do so
    */ 
   public Player getWinner() {
-   Player winner = getWinner(player, bot);
-  
-    if (winner.move == winner.winningCard) {
-      state = GAME_STATE.ROUND_RESULTS;
-      winner.score++;
-      return winner;
+   RESULT winner = getWinner(player, bot);
+   Player success;
+    
+    switch (winner) {
+      case TIE: 
+	if (player.hand.isEmpty()) {
+	  // TODO: if debug: assert bot.hand.isEmpty()
+	  distributeCards();
+	}
+      return null;
+      break;
+      case P1:
+	success = player;
+	break;
+      case P2:
+	success = bot;
+	break;
     }
     
-   return null;
+    // assert success != null
+    if (success.move == success.winningCard) {
+      state = GAME_STATE.ROUND_RESULTS;
+      success.score++;
+      return success;
+    }
+    else {
+      revealCardTo = (success == player) ? (player) : (bot);
+      return null;
+    }
   }
 
   /**
