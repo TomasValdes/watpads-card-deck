@@ -26,8 +26,6 @@ public class RockPaperScissors {
     ROUND_RESULTS
   }
 
-
-
   /**
    * Runs a game to completion
    */

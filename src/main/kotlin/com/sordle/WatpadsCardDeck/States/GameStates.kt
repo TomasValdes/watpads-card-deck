@@ -1,0 +1,6 @@
+enum class GameStates {
+ CARD_DRAFT,
+ PLAYING_CARRDS,
+ REVEALING_CARDS,
+ ROUND_RESULTS
+}

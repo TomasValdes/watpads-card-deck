@@ -1,13 +1,10 @@
-import RockPaperScissors.CARDS;
-import RockPaperScissors.GAME_STATE;
-import RockPaperScissors.RESULT;
 import Player;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class BotGame {
-  private final ArrayList<CARDS> cardOptions = new ArrayList<>(Arrays.asList(CARDS.ROCK, CARDS.PAPER, CARDS.SCISSORS);
+  private final ArrayList<CARDS> cardOptions = new ArrayList<>(Arrays.asList(CARDS.ROCK, CARDS.PAPER, CARDS.SCISSORS));
   private final short HAND_SIZE = 3;
   private final short CARDS_TO_REVEAL = 2;
   private final Random random;
@@ -21,6 +18,33 @@ public class BotGame {
   private GAME_STATE state; // the current state of the game
 
   private short cardCounter = 0;
+
+  public enum GAME_STATE {
+    CARD_DRAFT,
+    PLAYING_CARDS,
+    REVEAL_CARDS,
+    ROUND_RESULTS
+  }
+
+  public enum CARDS {
+    ROCK(0), 
+    PAPER(1), 
+    SCISSORS(2);
+
+    private int key;
+
+    CARDS(int key) {
+      this.key = key;
+    }
+
+    public int getValue() {
+      return key;
+    }
+  }
+
+  public enum RESULT {
+    TIE, P1, P2
+  }
 
   private final RESULT[][] movesToResult = {
     {RESULT.TIE, RESULT.P2, RESULT.P1},
@@ -100,7 +124,7 @@ public class BotGame {
 	  // TODO: if debug: assert bot.hand.isEmpty()
 	  distributeCards();
 	}
-      return null;
+        return null;
       break;
       case P1:
 	success = player;
@@ -118,6 +142,7 @@ public class BotGame {
     }
     else {
       revealCardTo = (success == player) ? (player) : (bot);
+      state = GAME_STATE.REVEAL_CARDS;
       return null;
     }
   }
@@ -156,9 +181,20 @@ public class BotGame {
     return cardOptions;
   }
 
+  public List<CARDS> getRevealedCards(Player player) {
+    if (player == revealCardTo) {
+      state = GAME_STATE.PLAYING_CARDS;
+      return currentDeck.subList(0, CARDS_TO_REVEAL);
+    }
+    else {
+      return null;
+    }
+    //FIXME: logical error on distributing the cards if a user won without their win condition on the last iteration of card.
+  }
+
   public void play_again() {
     // update some sort of score in db here as well as games played
-
+    
     state = GAME_STATE.CARD_DRAFT;
   }
 
