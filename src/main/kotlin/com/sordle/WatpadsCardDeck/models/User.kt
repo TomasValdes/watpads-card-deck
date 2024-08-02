@@ -2,13 +2,15 @@ package com.sordle.watpadsCardDeck.models
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
-import org.springframework.data.cassandra.core.mapping.PrimaryKey
-import org.springframework.data.cassandra.core.mapping.Table
-import java.util.UUID
+import jakarta.persistence.*
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-@Table
+@Entity
 data class User (
-        @PrimaryKey
-        val userId: UUID
+        @Id
+        @GeneratedValue(strategy= GenerationType.AUTO)
+        val userId: Long = 0,
+
+        @Column(unique = true, nullable = false)
+        val userName: String = ""
 )

@@ -1,4 +1,4 @@
-package com.sordle.WatpadsCardDeck
+package com.sordle.watpadsCardDeck
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
