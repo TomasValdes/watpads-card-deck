@@ -7,7 +7,7 @@ class Player(
   ) {
    val score: Integer = 0;
    val move: Cards;
-   val winCondition: Cards;
+   val winCondition: Cards?;
    val hasPlayed: boolean = false;
 
 

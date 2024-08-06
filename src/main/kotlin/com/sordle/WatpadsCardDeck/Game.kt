@@ -15,7 +15,7 @@ class Game(private const Player: p1, private const p2: Player) {
   private var startingDeck: LinkedList<Cards> = LinkedList(cardOptions)
   private var currentDeck: LinkedList<Cards> = LinkedList()
   private var revealCardTo: Player? = null
-  private var state: GameState = GameState.CARD_DRAFT
+  private var state: GameState = GameState.SELECTING_TRUMP
   private var cardCounter: Short = 0
 
    
@@ -24,6 +24,24 @@ class Game(private const Player: p1, private const p2: Player) {
       arrayOf(RESULT.P1, RESULT.TIE, RESULT.P2),
       arrayOf(RESULT.P2, RESULT.P1, RESULT.TIE)
   )
+
+  /**
+  * Sets the object to its default states
+  */
+  init {
+    playAgain()
+  }
+
+  /**
+  * @param player the player who is selecting their win condition
+  * @param card the "trump suit"
+  */
+  open fun selectTrump(player: Player, card: Cards) {
+    player.winCondition = card;
+    if (p1.winCondition != null && p2.winCondition != null) {
+      state = CARD_DRAFT
+    }
+  }
 
     /**
      * Drafts the card into the starting deck
@@ -52,8 +70,8 @@ class Game(private const Player: p1, private const p2: Player) {
     }
 
     /**
-     * Determines the winner of the game and is dependent on win condition.
-     * @return the winner of the game and null if neither player has won yet. updates game state if appropriate to do so
+     * Determines the winner of the trick
+     * @return the winner of the trick. updates game state according to whether the game should keep going or not
      */
     fun getWinner(): Player? {
         val winner = getWinner(p1, p2)
@@ -61,8 +79,7 @@ class Game(private const Player: p1, private const p2: Player) {
 
         when (winner) {
             GameResult.TIE -> {
-                if (p1.hand.isEmpty()) {
-                    // TODO: if debug: assert bot.hand.isEmpty()
+                if (p1.hand.isEmpty()) { // p1 and p2 should have the same hand size here
                     distributeCards()
                 }
                 return null
@@ -73,12 +90,12 @@ class Game(private const Player: p1, private const p2: Player) {
 
         // assert success != null
         if (success.move == success.winningCard) {
-            state = GAME_STATE.ROUND_RESULTS
+            state = GameState.ROUND_RESULTS
             success.score++
             return success
         } else {
             revealCardTo = if (success == p1) p1 else p2
-            state = GAME_STATE.REVEAL_CARDS
+            state = GameState.REVEAL_CARDS
             return null
         }
     }
@@ -98,8 +115,28 @@ class Game(private const Player: p1, private const p2: Player) {
    * @param index the index of the card in the players hand to remove
    * plays the card and removes it from the player's hand
    */ 
-    fun playCard(player: Player, index: Int) {
+    open fun playCard(player: Player, index: Int) {
+      if (index >= player.hand.size()) {
+	return
+      }
+      
+      var other: Player
+      if (player == p1) {
+	other = p2
+      }
+      else {
+	other = p1
+      }
+
+      if (player.hand.size() < other.hand.size()) {
+	return
+      }
+
       player.move = player.hand.removeAt(index);
+
+      if (p1.hand.isEmpty() && p2.hand.isEmpty()) {
+	state = TRICK_RESULTS
+      }
     }
 
     /**
@@ -125,7 +162,12 @@ class Game(private const Player: p1, private const p2: Player) {
     fun playAgain() {
       // update db with score here
 
-      state = GameState.CARD_DRAFT;
+      state = GameState.SELECTING_TRUMP;
       startingDeck = new LinkedList<>(cardOptions); 
+
+      // reset the players in case not already
+      p1.winCondition = null
+      p2.winCondition = null
+      revealCardTo = null
     }
 }
