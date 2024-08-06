@@ -20,14 +20,4 @@ class Player(
     return other.getID() == getID()
   }
 
-
-  //TODO: TOMAS is this neccessary
-  fun getID() {
-    return id
-  }
-  
-
-  
 }
-
-
