@@ -11,7 +11,7 @@ const val HAND_SIZE: Integer = 3;
 const val CARDS_TO_REVEAL: Integer = 2;
 
 class Game(private const Player: p1, private const p2: Player) {
-  private val cardOptions = arrayListOf(CARDS.ROCK, CARDS.PAPER, CARDS.SCISSORS) //TODO: look to remove  
+  private val cardOptions = arrayListOf(CARDS.ROCK, CARDS.PAPER, CARDS.SCISSORS)
   private var startingDeck: LinkedList<Cards> = LinkedList(cardOptions)
   private var currentDeck: LinkedList<Cards> = LinkedList()
   private var revealCardTo: Player? = null
@@ -56,7 +56,7 @@ class Game(private const Player: p1, private const p2: Player) {
      * @return the winner of the game and null if neither player has won yet. updates game state if appropriate to do so
      */
     fun getWinner(): Player? {
-        val winner = getWinner(player, bot)
+        val winner = getWinner(p1, p2)
         val success: Player?
 
         when (winner) {
@@ -67,8 +67,8 @@ class Game(private const Player: p1, private const p2: Player) {
                 }
                 return null
             }
-            GameResult.P1 -> success = player
-            GameResult.P2 -> success = bot
+            GameResult.P1 -> success = p1
+            GameResult.P2 -> success = p2
         }
 
         // assert success != null
@@ -77,20 +77,34 @@ class Game(private const Player: p1, private const p2: Player) {
             success.score++
             return success
         } else {
-            revealCardTo = if (success == player) player else bot
+            revealCardTo = if (success == p1) p1 else p2
             state = GAME_STATE.REVEAL_CARDS
             return null
         }
     }
 
+    /**
+   * @param p1 player 1 relective in {@link #RESULT}
+   * @param p2 player 2 reflective in {@link #RESULT}
+   * Determines the winner of the standard game without taking into account win conditions
+   * @return the winner according to the decision matrix as a result reflecting the order of the parameters
+   */ 
     private fun GameResult getWinner() {
       return movesToResult[p1.move][p2.move]; 
     }
 
-    fun playCard(index: Int) {
+  /**
+   * @param player the player who is playing the card
+   * @param index the index of the card in the players hand to remove
+   * plays the card and removes it from the player's hand
+   */ 
+    fun playCard(player: Player, index: Int) {
       player.move = player.hand.removeAt(index);
     }
 
+    /**
+    * get options of what can be drafted
+    */
     fun getDraftOptions(): List<Cards> {
      return cardOptions; 
     }
@@ -105,6 +119,9 @@ class Game(private const Player: p1, private const p2: Player) {
       }
     }
 
+    /**
+    * play the game again?
+    */
     fun playAgain() {
       // update db with score here
 
