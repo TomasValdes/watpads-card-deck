@@ -11,8 +11,19 @@ class Player(
    val hasPlayed: boolean = false;
 
 
-  incrimentScore() {
+  @Synchronized
+  fun incrimentScore() {
     score++
+  }
+
+  fun equals(other: Player) {
+    return other.getID() == getID()
+  }
+
+
+  //TODO: TOMAS is this neccessary
+  fun getID() {
+    return id
   }
   
 
