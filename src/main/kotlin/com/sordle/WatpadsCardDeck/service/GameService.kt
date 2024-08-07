@@ -1,4 +1,4 @@
-package com.WatpardsCardDeck
+package com.WatpardsCardDeck.service
 
 import States.GameState
 import States.GameResult
