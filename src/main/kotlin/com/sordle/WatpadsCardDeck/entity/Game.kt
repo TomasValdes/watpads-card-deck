@@ -1,4 +1,4 @@
-package com.WatpardsCardDeck
+package com.sordle.WatpardsCardDeck.entity
 
 import States.GameState
 import States.GameResult

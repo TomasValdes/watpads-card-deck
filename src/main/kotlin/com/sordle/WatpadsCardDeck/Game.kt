@@ -1,15 +1,8 @@
-package com.sordle.WatpardsCardDeck.service
+package com.WatpardsCardDeck
 
-import com.sordle.WatpadsCardDeck.States.GameState
-import com.sordle.WatpadsCardDeck.States.GameResult
-import com.sordle.WatpadsCardDeck.States.Cards
-
-import com.sordle.WatpadsCardDeck.model.GameResponse
-import com.sordle.WatpadsCardDeck.entity.User
-
-import org.springframework.web.socket.WebSocketSession
-
-import com.sordle.WatpadsCardDeck.model.PlayerMove
+import States.GameState
+import States.GameResult
+import States.Cards
 
 import kotlin.collections.ArrayList
 import kotlin.collections.LinkedList
@@ -17,27 +10,20 @@ import kotlin.collections.LinkedList
 const val HAND_SIZE: Integer = 3;
 const val CARDS_TO_REVEAL: Integer = 2;
 
-
-public interface GameService {
-  fun start(session: WebSocketSession): GameResponse
-  fun joinGame(session: WebSocketSession, gameId: Long) : GameResponse
-  fun draftCardToDeck(session: WebSocketSession, move: PlayerMove) 
-  fun selectTrump(session: WebSocketSession, move: PlayerMove)
-  fun playCard(session: WebSocketSession, move: PlayerMove)
-  fun playAgain(session: WebSocketSession, userId: Long)
-  fun deleteGame(session: WebSocketSession)
-  fun leaveGame(session: WebSocketSession, userId: Long)
-}
-
 class Game(private const Player: p1, private const p2: Player) {
+  // purely model
   private val cardOptions = arrayListOf(CARDS.ROCK, CARDS.PAPER, CARDS.SCISSORS)
+
+  // model and entity
   private var startingDeck: LinkedList<Cards> = LinkedList(cardOptions)
   private var currentDeck: LinkedList<Cards> = LinkedList()
-  private var revealCardTo: Player? = null
+  
   private var state: GameState = GameState.SELECTING_TRUMP
-  private var cardCounter: Short = 0
+ 
 
-   
+  // entity only
+ private var cardCounter: Short = 0
+  private var revealCardTo: Player? = null
   private val movesToResult = arrayOf(
       arrayOf(RESULT.TIE, RESULT.P2, RESULT.P1),
       arrayOf(RESULT.P1, RESULT.TIE, RESULT.P2),
