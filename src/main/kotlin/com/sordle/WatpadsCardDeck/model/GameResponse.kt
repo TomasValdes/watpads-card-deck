@@ -14,8 +14,10 @@ class GameResponse(
    private val deck: LinkedList<Cards>
    private val gameState: GameState 
    private val scores: Scores
+  
+) {
+  
 
-)
   
 
 }

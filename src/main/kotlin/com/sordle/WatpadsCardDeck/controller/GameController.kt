@@ -20,7 +20,7 @@ class GameResponse(
   
 
   
-  open fun draftCard(session: WebSockerSession, move: PlayerMove) {
+  open fun draftCard(session: WebSocketSession, move: PlayerMove) {
     
   }
 
@@ -31,8 +31,12 @@ class GameResponse(
   }
 
   override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
+    super.handleTextMessage(session, message)
+    // logger.info(session.getId() + " Connected")
     try {
-      
+      when (session.state) {
+	
+      }
     }
     catch (e: Exception) {
       logger.error("Caught an exception during message processing", e)
