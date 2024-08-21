@@ -16,7 +16,7 @@ class Player(
     score++
   }
 
-  fun equals(other: Player) {
+  fun equals(other: Player): Bool {
     return other.getID() == getID()
   }
 

@@ -35,7 +35,12 @@ class GameResponse(
     // logger.info(session.getId() + " Connected")
     try {
       when (session.state) {
-	
+	ClientState.OPENED -> {
+	  
+	}
+	ClientState.LOBBY -> {
+
+	}
       }
     }
     catch (e: Exception) {

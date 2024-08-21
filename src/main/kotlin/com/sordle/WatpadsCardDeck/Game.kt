@@ -11,17 +11,14 @@ const val HAND_SIZE: Integer = 3;
 const val CARDS_TO_REVEAL: Integer = 2;
 
 class Game(private const Player: p1, private const p2: Player) {
-  // purely model
-  private val cardOptions = arrayListOf(CARDS.ROCK, CARDS.PAPER, CARDS.SCISSORS)
-
-  // model and entity
+  // entity and bean
   private var startingDeck: LinkedList<Cards> = LinkedList(cardOptions)
   private var currentDeck: LinkedList<Cards> = LinkedList()
   
   private var state: GameState = GameState.SELECTING_TRUMP
  
 
-  // entity only
+  // bean only
  private var cardCounter: Short = 0
   private var revealCardTo: Player? = null
   private val movesToResult = arrayOf(
@@ -30,38 +27,17 @@ class Game(private const Player: p1, private const p2: Player) {
       arrayOf(RESULT.P2, RESULT.P1, RESULT.TIE)
   )
 
+  private var highestId: Int // stores the higher of the two ID's
+  private var players: Player[2]
+  
+
   /**
   * Sets the object to its default states
   */
   init {
     playAgain()
   }
-
-  /**
-  * @param player the player who is selecting their win condition
-  * @param card the "trump suit"
-  */
-  open fun selectTrump(player: Player, card: Cards) {
-    player.winCondition = card;
-    if (p1.winCondition != null && p2.winCondition != null) {
-      state = CARD_DRAFT
-    }
-  }
-
-    /**
-     * Drafts the card into the starting deck
-     * After the bot drafts its cards, the cards are distributed and the game state changes to playing cards
-     */
-    open fun draftCard(card: Cards) {
-        startingDeck.add(card)
-        cardCounter++
-        if (cardCounter == HAND_SIZE * 2) {
-            distributeCards()
-            state = GameState.PLAYING_CARDS
-            cardCounter = 0
-        }
-    }
-
+   
     /**
      * distributes the cards between the players at random
      */
@@ -108,12 +84,63 @@ class Game(private const Player: p1, private const p2: Player) {
     /**
    * @param p1 player 1 relective in {@link #RESULT}
    * @param p2 player 2 reflective in {@link #RESULT}
-   * Determines the winner of the standard game without taking into account win conditions
+   * Determines the winner of the standard game without taking into account win conditions.
    * @return the winner according to the decision matrix as a result reflecting the order of the parameters
    */ 
     private fun GameResult getWinner() {
       return movesToResult[p1.move][p2.move]; 
     }
+
+    /**
+    * @param player the player who selects the card
+    * @param card the card to be selected
+    * Select a card at some point in the game state
+    */
+    open fun selectCard(player: Player, card: Card) {
+      when (state) {
+	GameState.SELECTING_TRUMP -> {
+	  player.winCondition = card;
+	  if (p1.winCondition != null && p2.winCondition != null) {
+	    state = CARD_DRAFT
+	  }
+	}
+
+	GameState.CARD_DRAFT -> {
+	  startingDeck.add(card)
+	  cardCounter++
+	  if (cardCounter == HAND_SIZE * 2) {
+            distributeCards()
+            state = GameState.PLAYING_CARDS
+            cardCounter = 0
+	  }
+	}
+
+	GameState.PLAYING_CARDS -> {
+	  if (!player.hand.contains(card)) {
+	    return
+	  }
+      
+	  var other: Player
+	  if (player == p1) {
+	    other = p2
+	  }
+	  else {
+	    other = p1
+	  }
+
+	  if (player.hand.size() < other.hand.size()) {
+	    return
+	  }
+
+	  player.move = player.hand.remove(card);
+
+	  if (p1.hand.isEmpty() && p2.hand.isEmpty()) {
+	    state = TRICK_RESULTS
+	  }
+	}
+      }
+    }
+
 
   /**
    * @param player the player who is playing the card
@@ -174,5 +201,9 @@ class Game(private const Player: p1, private const p2: Player) {
       p1.winCondition = null
       p2.winCondition = null
       revealCardTo = null
+    }
+
+    private fun getPlayerFromID(id: Int): Player {
+      return players[id / highestID]
     }
 }

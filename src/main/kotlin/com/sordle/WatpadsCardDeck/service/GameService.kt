@@ -1,13 +1,15 @@
 package com.sordle.WatpardsCardDeck.service
 
-import com.sordle.WatpadsCardDeck.States.GameState
+import com.sordle.WatpadsCardDeck.model.GameState
 import com.sordle.WatpadsCardDeck.States.GameResult
 import com.sordle.WatpadsCardDeck.States.Cards
 
 import com.sordle.WatpadsCardDeck.model.GameResponse
 import com.sordle.WatpadsCardDeck.entity.User
+import com.sordle.WatpadsCardDeck.
 
 import org.springframework.web.socket.WebSocketSession
+import org.springframework.context.ApplicationContext
 
 import com.sordle.WatpadsCardDeck.model.PlayerMove
 
@@ -18,7 +20,7 @@ const val HAND_SIZE: Integer = 3;
 const val CARDS_TO_REVEAL: Integer = 2;
 
 
-public interface GameService {
+public interface GameService(private val appContext: ApplicationContext) {
   fun start(session: WebSocketSession): GameResponse
   fun joinGame(session: WebSocketSession, gameId: Long) : GameResponse
   fun draftCardToDeck(session: WebSocketSession, move: PlayerMove) 
@@ -29,20 +31,10 @@ public interface GameService {
   fun leaveGame(session: WebSocketSession, userId: Long)
 }
 
-class Game(private const Player: p1, private const p2: Player) {
-  private val cardOptions = arrayListOf(CARDS.ROCK, CARDS.PAPER, CARDS.SCISSORS)
-  private var startingDeck: LinkedList<Cards> = LinkedList(cardOptions)
-  private var currentDeck: LinkedList<Cards> = LinkedList()
-  private var revealCardTo: Player? = null
-  private var state: GameState = GameState.SELECTING_TRUMP
-  private var cardCounter: Short = 0
+class GameService(private val appContext: ApplicationContext) {
+  // should this be Player? or String? or id?
+  private var userToGame: Hashmap<String, Game>  
 
-   
-  private val movesToResult = arrayOf(
-      arrayOf(RESULT.TIE, RESULT.P2, RESULT.P1),
-      arrayOf(RESULT.P1, RESULT.TIE, RESULT.P2),
-      arrayOf(RESULT.P2, RESULT.P1, RESULT.TIE)
-  )
 
   /**
   * Sets the object to its default states
@@ -55,7 +47,8 @@ class Game(private const Player: p1, private const p2: Player) {
   * @param player the player who is selecting their win condition
   * @param card the "trump suit"
   */
-  open fun selectTrump(player: Player, card: Cards) {
+  open fun selectTrump(session: WebSocketSession, card: Cards) {
+    val userName = session.userName
     player.winCondition = card;
     if (p1.winCondition != null && p2.winCondition != null) {
       state = CARD_DRAFT
@@ -88,6 +81,27 @@ class Game(private const Player: p1, private const p2: Player) {
         }
     }
 
+    open fun joinRandom(Player player) {
+      
+    }
+
+    open fun joinRoomByNum(session: WebSocketSession, player: Player, id: Int) {
+
+    }
+
+    open fun joinBotRoom(session: WebSocketSession, player: Player) {
+      
+    }
+
+    open fun joinRandomRoom(session: WebSocketSession, player: Player) {
+      
+    }
+
+    open fun readyUp(session: WebSocketSession, player: Player) {
+      //TODO: assert in REVEALING_CARDS_PHASE
+      state = GameState.PLAYING_CARDS
+    }
+
     /**
      * Determines the winner of the trick
      * @return the winner of the trick. updates game state according to whether the game should keep going or not
@@ -112,7 +126,7 @@ class Game(private const Player: p1, private const p2: Player) {
             state = GameState.ROUND_RESULTS
             success.score++
             return success
-        } else {
+       } else {
             revealCardTo = if (success == p1) p1 else p2
             state = GameState.REVEAL_CARDS
             return null
@@ -127,6 +141,52 @@ class Game(private const Player: p1, private const p2: Player) {
    */ 
     private fun GameResult getWinner() {
       return movesToResult[p1.move][p2.move]; 
+    }
+
+    open fun selectCard(session: WebSocketSession, player: Player, card: Card) {
+    val userName = session.userName
+      when (state) {
+	GameState.SELECTING_TRUMP -> {
+	  player.winCondition = card;
+	  if (p1.winCondition != null && p2.winCondition != null) {
+	    state = CARD_DRAFT
+	  }
+	}
+
+	GameState.CARD_DRAFT -> {
+	  startingDeck.add(card)
+	  cardCounter++
+	  if (cardCounter == HAND_SIZE * 2) {
+            distributeCards()
+            state = GameState.PLAYING_CARDS
+            cardCounter = 0
+	  }
+	}
+
+	GameState.PLAYING_CARDS -> {
+	  if (!player.hand.contains(card)) {
+	    return
+	  }
+      
+	  var other: Player
+	  if (player == p1) {
+	    other = p2
+	  }
+	  else {
+	    other = p1
+	  }
+
+	  if (player.hand.size() < other.hand.size()) {
+	    return
+	  }
+
+	  player.move = player.hand.remove(card);
+
+	  if (p1.hand.isEmpty() && p2.hand.isEmpty()) {
+	    state = TRICK_RESULTS
+	  }
+	}
+      }
     }
 
   /**
