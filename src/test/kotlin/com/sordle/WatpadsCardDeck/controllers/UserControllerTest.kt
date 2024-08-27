@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import com.ninjasquad.springmockk.MockkBean
 import com.sordle.watpadsCardDeck.model.UserRequest
+import com.sordle.watpadsCardDeck.service.GameService
 import io.mockk.just
 import io.mockk.runs
 import org.springframework.http.MediaType
@@ -22,6 +23,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 class UserControllerTest(@Autowired val mockMvc: MockMvc) {
     @MockkBean
     lateinit var userService: UserService
+    @MockkBean
+    lateinit var gameService: GameService
     private val objectMapper = ObjectMapper()
     private val testUser = User(
         userId = 213412,
