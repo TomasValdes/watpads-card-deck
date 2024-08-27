@@ -48,16 +48,15 @@ data class Game (
 
     @Embedded
     @AttributeOverrides(
-        AttributeOverride(name = "user.userId", column = Column(name = "player_one_user_id")),
+        AttributeOverride(name = "userId", column = Column(name = "player_one_user_id")),
         AttributeOverride(name = "trumpCard", column = Column(name = "player_one_trump_card")),
         AttributeOverride(name = "playerHand", column = Column(name = "player_one_hand"))
-
     )
     var playerOne: Player? = null,
 
     @Embedded
     @AttributeOverrides(
-        AttributeOverride(name = "user.userId", column = Column(name = "player_two_user_id")),
+        AttributeOverride(name = "userId", column = Column(name = "player_two_user_id")),
         AttributeOverride(name = "trumpCard", column = Column(name = "player_two_trump_card")),
         AttributeOverride(name = "playerHand", column = Column(name = "player_two_hand"))
     )
