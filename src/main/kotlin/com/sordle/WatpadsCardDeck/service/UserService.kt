@@ -7,7 +7,6 @@ import com.sordle.watpadsCardDeck.model.toEntity
 import com.sordle.watpadsCardDeck.repository.UserRepository
 import org.springframework.stereotype.Service
 
-
 @Service
 class UserService (
         private val userProfileRepository: UserRepository
