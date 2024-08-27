@@ -2,12 +2,17 @@ package com.sordle.watpadsCardDeck.entity
 
 import com.sordle.watpadsCardDeck.model.Cards
 import jakarta.persistence.*
+import org.springframework.data.annotation.CreatedDate
+import java.time.LocalDateTime
 
 /**
  * Represents the states that the game could be in.
  * General game flow should go down the line as they appear in order
  */
 enum class GameStates {
+    // status to signify game isn't ready to start
+    WaitingForPlayers,
+
     // select the card you want to win with
     SelectingTrump,
 
@@ -33,14 +38,31 @@ data class Game (
     @GeneratedValue(strategy = GenerationType.AUTO)
     val gameId: Long = 0,
 
-    val gameState: GameStates = GameStates.SelectingTrump,
+    var gameState: GameStates = GameStates.WaitingForPlayers,
 
     @ElementCollection
     val startingDeck: List<Cards> = listOf(),
 
     @ElementCollection
-    val currentDeck: MutableList<Cards> = mutableListOf(),
+    var currentDeck: MutableList<Cards> = mutableListOf(),
 
-    @OneToMany(mappedBy = "id.gameId", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val players: List<Player> = listOf()
+    @Embedded
+    @AttributeOverrides(
+        AttributeOverride(name = "user.userId", column = Column(name = "player_one_user_id")),
+        AttributeOverride(name = "trumpCard", column = Column(name = "player_one_trump_card")),
+        AttributeOverride(name = "playerHand", column = Column(name = "player_one_hand"))
+
+    )
+    var playerOne: Player? = null,
+
+    @Embedded
+    @AttributeOverrides(
+        AttributeOverride(name = "user.userId", column = Column(name = "player_two_user_id")),
+        AttributeOverride(name = "trumpCard", column = Column(name = "player_two_trump_card")),
+        AttributeOverride(name = "playerHand", column = Column(name = "player_two_hand"))
+    )
+    var playerTwo: Player? = null,
+
+    @CreatedDate
+    val createdDate: LocalDateTime = LocalDateTime.now()
     )
