@@ -1,11 +1,8 @@
 package com.sordle.watpadsCardDeck.entity
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.databind.annotation.JsonNaming
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 @Entity
 data class User (
         @Id
