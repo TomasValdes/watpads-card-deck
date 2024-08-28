@@ -2,7 +2,6 @@ package com.sordle.watpadsCardDeck.entity
 
 import com.sordle.watpadsCardDeck.model.Cards
 import jakarta.persistence.*
-import java.io.Serializable
 
 /**
  * Entity that represents player in a game.
