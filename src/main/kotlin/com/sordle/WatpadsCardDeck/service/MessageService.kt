@@ -5,6 +5,9 @@ import com.sordle.watpadsCardDeck.util.gameId
 import org.springframework.stereotype.Service
 import org.springframework.web.socket.WebSocketSession
 
+/**
+ * Handles incoming websocket messages
+ */
 @Service
 class MessageService(
     private val gameService: GameService

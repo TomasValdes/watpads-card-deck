@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 
+/**
+ * Used for RESTFUL requests related to the game.
+ */
 @RestController
 @RequestMapping("game")
 class GameController(

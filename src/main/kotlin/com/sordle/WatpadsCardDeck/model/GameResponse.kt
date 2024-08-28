@@ -3,6 +3,9 @@ package com.sordle.watpadsCardDeck.model
 import com.sordle.watpadsCardDeck.entity.Game
 import com.sordle.watpadsCardDeck.entity.GameStates
 
+/**
+ * Message returned by application to describe current game state
+ */
 data class GameResponse (
     val gameId: Long,
     val gameState: GameStates,

@@ -5,6 +5,10 @@ import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import com.google.gson.Gson
 
+/**
+ * Util for websockets
+ */
+
 private val logger = LoggerFactory.getLogger("com.sordle.watpadsCardDeck.controller.GameWebSocketHandler")
 
 val WebSocketSession.gameId: Long

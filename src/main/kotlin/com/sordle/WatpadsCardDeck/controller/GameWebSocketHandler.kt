@@ -8,6 +8,9 @@ import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import org.springframework.web.socket.WebSocketSession
 
+/**
+ * Handles websocket that is used to play through game
+ */
 @Component
 class GameWebSocketHandler (
     private val gameService: GameService,
