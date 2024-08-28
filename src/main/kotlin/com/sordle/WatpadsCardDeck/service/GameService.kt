@@ -3,10 +3,15 @@ package com.sordle.watpadsCardDeck.service
 import com.sordle.watpadsCardDeck.entity.Game
 import com.sordle.watpadsCardDeck.entity.GameStates
 import com.sordle.watpadsCardDeck.entity.Player
-import com.sordle.watpadsCardDeck.model.GameRequest
+import com.sordle.watpadsCardDeck.exception.NotFoundException
+import com.sordle.watpadsCardDeck.model.GameResponse
 import com.sordle.watpadsCardDeck.repository.GameRepository
+import com.sordle.watpadsCardDeck.util.gameId
+import com.sordle.watpadsCardDeck.util.sendObjectMessage
+import com.sordle.watpadsCardDeck.util.userId
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.socket.WebSocketSession
 
 @Service
 class GameService(
@@ -14,33 +19,71 @@ class GameService(
     private val userService: UserService
 ) {
     /**
-     * Creates a game with a single player,
-     * leaving it ready to be joined by another player
+     * Finds the oldest game waiting for a player or create one if it doesn't exist
      */
-    fun createGame(gameRequest: GameRequest){
-        gameRepository.save(
-            Game(
-                playerOne = Player(userId = gameRequest.userId)
-            )
-        )
+    fun findGame() : GameResponse{
+        val openGames = gameRepository.findByGameStateOrderByCreatedDateAsc(GameStates.WaitingForPlayers)
+        return if (openGames.isEmpty()){
+            createGame()
+        } else {
+            GameResponse(openGames[0])
+        }
     }
 
     /**
-     * Finds the oldest game waiting for a player and adds user to it
+     * Add a player to requested game if possible
      */
     @Transactional
-    fun joinGame(gameRequest: GameRequest){
-        // Ensure user exists
-        userService.getUser(gameRequest.userId)
-
-        val openGames = gameRepository.findByGameStateOrderByCreatedDateAsc(GameStates.WaitingForPlayers)
-        if (openGames.isEmpty()){
-            createGame(gameRequest)
+    fun joinGame(session: WebSocketSession){
+        val gameToJoin = getGame(session.gameId)
+        if (gameToJoin.playerOne != null){
+            gameToJoin.playerOne = Player(userId = session.userId)
+        } else if (gameToJoin.playerTwo != null){
+            gameToJoin.playerTwo = Player(userId = session.userId)
         } else {
-            val gameToJoin = openGames[0]
-            gameToJoin.playerTwo = Player(userId = gameRequest.userId)
-            gameToJoin.gameState = GameStates.SelectingTrump
-            gameRepository.save(gameToJoin)
+
         }
+        gameToJoin.gameState = GameStates.SelectingTrump
+        gameRepository.save(gameToJoin)
+        session.sendObjectMessage(GameResponse(gameToJoin))
+    }
+
+    fun getGame(gameId: Long): Game{
+        val game = gameRepository.findById(gameId).orElse(null)
+        game?: throw NotFoundException(errorMessage =  "No user found with provided Id")
+        return game
+    }
+
+    /**
+     * Sets the trump for a player in a game both gotten from the given session
+     */
+    fun setTrump(){
+
+    }
+
+    /**
+     * Adds given cards to starter deck for a game from the given session
+     */
+    fun addCardsToDeck(){
+
+    }
+
+    /**
+     * Handles logic for playing given card for a player in a game both gotten from the given session
+     */
+    fun playCard(){
+
+    }
+
+    /**
+     * Creates a game with a single player,
+     * leaving it ready to be joined by another player
+     */
+    private fun createGame() : GameResponse{
+        return GameResponse(
+            gameRepository.save(
+                Game()
+            )
+        )
     }
 }
