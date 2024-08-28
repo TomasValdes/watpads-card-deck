@@ -30,6 +30,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib")
 	implementation("com.mysql:mysql-connector-j")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("com.google.code.gson:gson")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
