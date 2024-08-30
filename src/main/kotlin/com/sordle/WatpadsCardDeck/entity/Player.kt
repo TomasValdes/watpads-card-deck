@@ -7,12 +7,22 @@ import jakarta.persistence.*
  * Entity that represents player in a game.
  * Each player has a single game and user they are associated with.
  */
-@Embeddable
+@Entity
 data class Player (
-    val userId: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    val playerId: Long = 0,
+
+    @ManyToOne
+    val user: User = User(),
 
     @ElementCollection
-    val playerHand: MutableList<Cards> = mutableListOf(),
+    val hand: MutableList<Cards> = mutableListOf(),
 
-    val trumpCard: Cards? = null
+    @ElementCollection
+    var cardsAddedToDeck: MutableList<Cards> = mutableListOf(),
+
+    var trumpCard: Cards? = null,
+
+    var move: Cards? = null
 )

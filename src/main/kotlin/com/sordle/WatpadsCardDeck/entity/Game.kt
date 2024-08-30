@@ -35,33 +35,37 @@ enum class GameStates {
 @Entity
 data class Game (
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     val gameId: Long = 0,
 
     var gameState: GameStates = GameStates.WaitingForPlayers,
 
     @ElementCollection
-    val startingDeck: List<Cards> = listOf(),
+    val startingDeck: MutableList<Cards> = mutableListOf(),
 
     @ElementCollection
-    var currentDeck: MutableList<Cards> = mutableListOf(),
+    val currentDeck: MutableList<Cards> = mutableListOf(),
 
-    @Embedded
+    @OneToOne
     @AttributeOverrides(
         AttributeOverride(name = "userId", column = Column(name = "player_one_user_id")),
         AttributeOverride(name = "trumpCard", column = Column(name = "player_one_trump_card")),
         AttributeOverride(name = "playerHand", column = Column(name = "player_one_hand"))
     )
-    var playerOne: Player? = null,
+    val playerOne: Player = Player(),
 
-    @Embedded
+    @OneToOne
     @AttributeOverrides(
         AttributeOverride(name = "userId", column = Column(name = "player_two_user_id")),
         AttributeOverride(name = "trumpCard", column = Column(name = "player_two_trump_card")),
         AttributeOverride(name = "playerHand", column = Column(name = "player_two_hand"))
     )
-    var playerTwo: Player? = null,
+    val playerTwo: Player = Player(),
 
     @CreatedDate
     val createdDate: LocalDateTime = LocalDateTime.now()
+    ){
+    constructor(gameQueue: GameQueue) : this(
+        gameId = gameQueue.gameId,
+        playerOne = Player()
     )
+}

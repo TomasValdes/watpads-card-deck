@@ -9,13 +9,17 @@ import com.sordle.watpadsCardDeck.entity.GameStates
 data class GameResponse (
     val gameId: Long,
     val gameState: GameStates,
-    val playerOneUserId: Long?,
-    val playerTwoUserId: Long?
+    val playerOneUserId: Long,
+    val playerTwoUserId: Long,
+    val playerOneMove: Cards?,
+    val playerTwoMove: Cards?
     ) {
     constructor(game: Game) : this(
         gameId = game.gameId,
         gameState = game.gameState,
-        playerOneUserId = game.playerOne?.userId,
-        playerTwoUserId = game.playerTwo?.userId
+        playerOneUserId = game.playerOne.user.userId,
+        playerTwoUserId = game.playerTwo.user.userId,
+        playerOneMove = game.playerOne.move,
+        playerTwoMove = game.playerTwo.move
     )
 }
