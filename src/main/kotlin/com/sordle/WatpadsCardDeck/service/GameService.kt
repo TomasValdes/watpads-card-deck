@@ -23,7 +23,7 @@ class GameService(
      */
     fun findGame() : GameResponse{
         val openGames = gameRepository.findByGameStateOrderByCreatedDateAsc(GameStates.WaitingForPlayers)
-        return if (openGames.isEmpty()){
+        return if (openGames.isEmpty()) {
             createGame()
         } else {
             GameResponse(openGames[0])
@@ -48,7 +48,12 @@ class GameService(
         session.sendObjectMessage(GameResponse(gameToJoin))
     }
 
-    fun getGame(gameId: Long): Game{
+    /**
+    * @param gameId the id to fetch
+    * Get game via ID
+    * @return an entity for the game
+    */
+    fun getGame(gameId: Long): Game {
         val game = gameRepository.findById(gameId).orElse(null)
         game?: throw NotFoundException(errorMessage =  "No user found with provided Id")
         return game
@@ -57,21 +62,22 @@ class GameService(
     /**
      * Sets the trump for a player in a game both gotten from the given session
      */
-    fun setTrump(){
-
+    fun setTrump(session: WebSocketSession, card: Cards) { 
+      // verify that you are in the proper game mode
+      userService.getUser(session.userId)
     }
 
     /**
      * Adds given cards to starter deck for a game from the given session
      */
-    fun addCardsToDeck(){
+    fun addCardsToDeck() {
 
     }
 
     /**
      * Handles logic for playing given card for a player in a game both gotten from the given session
      */
-    fun playCard(){
+    fun playCard() {
 
     }
 
@@ -79,7 +85,7 @@ class GameService(
      * Creates a game with a single player,
      * leaving it ready to be joined by another player
      */
-    private fun createGame() : GameResponse{
+    private fun createGame() : GameResponse {
         return GameResponse(
             gameRepository.save(
                 Game()
