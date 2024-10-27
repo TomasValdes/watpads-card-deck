@@ -1,6 +1,5 @@
 package com.sordle.watpadsCardDeck.controller
 
-import com.sordle.watpadsCardDeck.model.GameResponse
 import com.sordle.watpadsCardDeck.service.GameService
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
