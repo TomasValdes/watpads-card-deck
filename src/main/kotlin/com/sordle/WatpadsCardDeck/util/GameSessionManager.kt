@@ -1,6 +1,7 @@
 package com.sordle.watpadsCardDeck.util
 
 import org.springframework.stereotype.Component
+import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.WebSocketSession
 import java.util.concurrent.ConcurrentHashMap
 
@@ -27,5 +28,10 @@ class GameSessionManager {
     fun sendMessageToGame(gameId: Long, obj: Any){
         val sessions = getSessions(gameId)
         sessions?.forEach { s -> s.sendObjectMessage(obj)}
+    }
+
+    fun endGameSessions(gameId: Long){
+        val sessions = getSessions(gameId)
+        sessions?.forEach { s -> s.close(CloseStatus(1000))}
     }
 }
