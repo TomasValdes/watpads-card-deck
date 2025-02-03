@@ -1,5 +1,6 @@
 package com.sordle.watpadsCardDeck.service
 
+import com.sordle.watpadsCardDeck.TestConfig
 import com.sordle.watpadsCardDeck.entity.User
 import com.sordle.watpadsCardDeck.model.UserRequest
 import com.sordle.watpadsCardDeck.model.toEntity
@@ -13,18 +14,13 @@ class UserServiceTest {
     private val userRepository: UserRepository = mockk()
     private val userService = UserService(userRepository)
 
-    private val testUser = User(
-        userId = 213412,
-        userName = "Test Name"
-    )
-
     private val testUserRequest = UserRequest(
         userName = "New Username"
     )
 
     @Test
     fun `create test user`() {
-        every { userRepository.save(testUserRequest.toEntity()) } answers { testUser }
+        every { userRepository.save(testUserRequest.toEntity()) } answers { TestConfig.testUser }
 
         userService.createUser(testUserRequest)
 
@@ -33,12 +29,12 @@ class UserServiceTest {
 
     @Test
     fun `get test user`() {
-        every { userRepository.findByIdOrNull(testUser.userId) } returns testUser
-        val result = userService.getUser(testUser.userId)
+        every { userRepository.findByIdOrNull(TestConfig.testUser.userId) } returns TestConfig.testUser
+        val result = userService.getUser(TestConfig.testUser.userId)
 
-        verify(exactly = 1) { userRepository.findByIdOrNull(testUser.userId) }
+        verify(exactly = 1) { userRepository.findByIdOrNull(TestConfig.testUser.userId) }
 
-        assertEquals(testUser, result)
+        assertEquals(TestConfig.testUser, result)
     }
 
 }
