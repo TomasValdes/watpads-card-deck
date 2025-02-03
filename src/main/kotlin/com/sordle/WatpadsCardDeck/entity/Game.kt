@@ -26,7 +26,7 @@ enum class GameStates {
     RevealingCards,
 
     // display the results of the game
-    RoundResults
+    GameResults
 }
 
 /**
@@ -61,11 +61,16 @@ data class Game (
     )
     val playerTwo: Player = Player(),
 
+    @OneToOne
+    @JoinColumn(name = "winner_user_id")
+    var winner: Player? = null, // Store the winner here
+
     @CreatedDate
     val createdDate: LocalDateTime = LocalDateTime.now()
     ){
     constructor(gameQueue: GameQueue) : this(
         gameId = gameQueue.gameId,
-        playerOne = Player()
+        playerOne = gameQueue.playerOne!!,
+        playerTwo = gameQueue.playerTwo!!
     )
 }
