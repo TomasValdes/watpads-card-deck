@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.adapter.standard.StandardWebSocketSession
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class GameServiceTest {
     private val gameQueueRepository: GameQueueRepository = mockk()
@@ -39,7 +38,7 @@ class GameServiceTest {
         every { gameQueueRepository.findAllByOrderByCreatedDateAsc()} answers { emptyList() }
         every { gameQueueRepository.save(any()) } answers { testQueuedGame }
 
-        assertEquals(testQueuedGame.gameId, gameService.findGame())
+        assertEquals(testQueuedGame.gameId, gameService.getGameToJoin())
         verify(exactly = 1) { gameQueueRepository.save(any()) }
     }
 

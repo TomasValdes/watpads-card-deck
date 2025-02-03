@@ -15,7 +15,7 @@ class GameController(
         private val gameService: GameService
 ){
     @GetMapping()
-    fun findGame(): ResponseEntity<Long>{
-        return ResponseEntity.ok(gameService.findGame())
+    fun getGameToJoin(): ResponseEntity<Long>{
+        return ResponseEntity.ok(gameService.getGameToJoin())
     }
 }
