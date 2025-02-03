@@ -41,20 +41,20 @@ class GameService(
      */
     @Transactional
     fun joinGame(session: WebSocketSession){
-        val gameQueue = getGameQueue(session.gameId)
-        if (gameQueue.playerOne == null){
-            gameQueue.playerOne = Player(
+        val queuedGame = getQueuedGame(session.gameId)
+        if (queuedGame.playerOne == null){
+            queuedGame.playerOne = Player(
                 user = userService.getUser(session.userId)
             )
         } else{
-            gameQueue.playerTwo = Player(
+            queuedGame.playerTwo = Player(
                 user = userService.getUser(session.userId)
             )
 
             val game = gameRepository.save(
-                Game(gameQueue)
+                Game(queuedGame)
             )
-            gameQueueRepository.delete(gameQueue)
+            gameQueueRepository.delete(queuedGame)
 
             gameSessionManager.sendMessageToGame(session.gameId, GameResponse(game))
         }
@@ -66,7 +66,7 @@ class GameService(
         return game
     }
 
-    fun getGameQueue(gameId: Long): GameQueue{
+    fun getQueuedGame(gameId: Long): GameQueue{
         val gameQueue = gameQueueRepository.findById(gameId).orElse(null)
         gameQueue?: throw NotFoundException(errorMessage =  "No game queue found with provided Id")
         return gameQueue
