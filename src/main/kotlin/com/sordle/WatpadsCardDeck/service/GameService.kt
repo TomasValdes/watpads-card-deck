@@ -27,7 +27,7 @@ class GameService(
      * Finds the oldest game waiting for a player or create one if it doesn't exist.
      * Joining game is accomplished through connecting to websocket with returned gameId
      */
-    fun findGame() : Long{
+    fun getGameToJoin() : Long{
         val openGames = gameQueueRepository.findAllByOrderByCreatedDateAsc()
         return if (openGames.isEmpty()){
             createNewGameInQueue()
