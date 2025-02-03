@@ -126,6 +126,7 @@ class GameService(
 
         if (game.playerOne.move != null && game.playerTwo.move != null) {
             game.gameState = GameStates.RevealingCards
+            gameSessionManager.sendMessageToGame(game.gameId, GameResponse(game))
             evaluateMoves(game)
         }
     }
@@ -166,16 +167,28 @@ class GameService(
 
         // Handle tie
         if (playerOne.move == playerTwo.move) {
+            game.gameState = GameStates.PlayingCards
             gameSessionManager.sendMessageToGame(game.gameId, GameResponse(game))
         }
         // Handle playerOne victory
         else if (didPlayerOneWinRound(game)){
-
+            if (playerOne.move == playerOne.trumpCard){
+                handlePlayerVictory(playerOne, game)
+            } else {
+                
+            }
         }
         // Handle playerTwo victory
         else {
+            if (playerTwo.move == playerTwo.trumpCard){
+                handlePlayerVictory(playerTwo, game)
+            } else{
 
+            }
         }
+
+        playerOne.move = null
+        playerTwo.move = null
     }
 
     private fun didPlayerOneWinRound(game: Game): Boolean {
@@ -184,6 +197,13 @@ class GameService(
         return (playerOneMove == Cards.Rock && playerTwoMove == Cards.Scissors)
                 || (playerOneMove == Cards.Paper && playerTwoMove == Cards.Rock)
                 || (playerOneMove == Cards.Scissors && playerTwoMove == Cards.Paper)
+    }
+
+    private fun handlePlayerVictory(player: Player, game: Game){
+        game.winner = player
+        game.gameState = GameStates.GameResults
+        gameSessionManager.sendMessageToGame(game.gameId, GameResponse(game))
+        gameSessionManager.endGameSessions(game.gameId)
     }
 
     private fun findPlayerInGame(game: Game, userId: Long): Player{
