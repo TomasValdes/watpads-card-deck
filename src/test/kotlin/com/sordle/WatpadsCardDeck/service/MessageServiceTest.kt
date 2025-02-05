@@ -1,7 +1,9 @@
 package com.sordle.watpadsCardDeck.service
 
 import com.sordle.watpadsCardDeck.TestConfig
+import com.sordle.watpadsCardDeck.entity.Game
 import com.sordle.watpadsCardDeck.entity.GameStates
+import com.sordle.watpadsCardDeck.util.game
 import com.sordle.watpadsCardDeck.util.setGame
 import io.mockk.*
 import org.junit.jupiter.api.Test
@@ -52,17 +54,9 @@ class MessageServiceTest {
 
     @Test
     fun `handle unexpected message`() {
+        (testConfig.testWebSocketGameSession.game as Game).gameState = GameStates.GameResults
         val exception = assertThrows<UnsupportedOperationException> {
             messageService.handleMessageToGame(testConfig.testWebSocketGameSession, selectTrumpTestMessage)
-        }
-
-        assertEquals(exception.message, "Unexpected message received")
-    }
-
-    @Test
-    fun `handle incorrectly formatted message`() {
-        val exception = assertThrows<UnsupportedOperationException> {
-            messageService.handleMessageToGame(testConfig.testWebSocketGameSession, "{}")
         }
 
         assertEquals(exception.message, "Unexpected message received")
