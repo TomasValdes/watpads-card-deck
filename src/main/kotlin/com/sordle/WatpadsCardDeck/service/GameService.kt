@@ -1,7 +1,7 @@
 package com.sordle.watpadsCardDeck.service
 
 import com.sordle.watpadsCardDeck.entity.Game
-import com.sordle.watpadsCardDeck.entity.GameQueue
+import com.sordle.watpadsCardDeck.entity.Lobby
 import com.sordle.watpadsCardDeck.entity.GameStates
 import com.sordle.watpadsCardDeck.entity.Player
 import com.sordle.watpadsCardDeck.exception.NotFoundException
@@ -24,7 +24,7 @@ class GameService(
     private final val fullHandSize = 3
 
     /**
-     * Finds the oldest game waiting for a player or create one if it doesn't exist.
+     * Finds the oldest queued game waiting for a player or create one if it doesn't exist.
      * Joining game is accomplished through connecting to websocket with returned gameId
      */
     fun getGameToJoin() : Long{
@@ -66,7 +66,7 @@ class GameService(
         return game
     }
 
-    fun getQueuedGame(gameId: Long): GameQueue{
+    fun getQueuedGame(gameId: Long): Lobby{
         val gameQueue = gameQueueRepository.findById(gameId).orElse(null)
         gameQueue?: throw NotFoundException(errorMessage =  "No game queue found with provided Id")
         return gameQueue
@@ -137,7 +137,7 @@ class GameService(
      */
     private fun createNewGameInQueue() : Long{
         return gameQueueRepository.save(
-            GameQueue()
+            Lobby()
         ).gameId
     }
 

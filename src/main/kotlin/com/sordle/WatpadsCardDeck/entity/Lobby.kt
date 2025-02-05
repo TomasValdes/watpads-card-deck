@@ -8,7 +8,7 @@ import java.time.LocalDateTime
  * Temporary entity used to assign players to a game
  */
 @Entity
-data class GameQueue (
+data class Lobby (
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     val gameId: Long = 0,

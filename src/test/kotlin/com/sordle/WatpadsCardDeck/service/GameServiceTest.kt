@@ -1,7 +1,7 @@
 package com.sordle.watpadsCardDeck.service
 
 import com.sordle.watpadsCardDeck.TestConfig
-import com.sordle.watpadsCardDeck.entity.GameQueue
+import com.sordle.watpadsCardDeck.entity.Lobby
 import com.sordle.watpadsCardDeck.model.GameResponse
 import com.sordle.watpadsCardDeck.repository.GameQueueRepository
 import com.sordle.watpadsCardDeck.repository.GameRepository
@@ -29,7 +29,7 @@ class GameServiceTest {
         null
     )
 
-    private val testQueuedGame = GameQueue(
+    private val testQueuedGame = Lobby(
         gameId = 1
     )
 

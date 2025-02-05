@@ -68,7 +68,7 @@ data class Game (
     @CreatedDate
     val createdDate: LocalDateTime = LocalDateTime.now()
     ){
-    constructor(gameQueue: GameQueue) : this(
+    constructor(gameQueue: Lobby) : this(
         gameId = gameQueue.gameId,
         playerOne = gameQueue.playerOne!!,
         playerTwo = gameQueue.playerTwo!!
