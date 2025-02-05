@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import com.google.gson.Gson
+import com.sordle.watpadsCardDeck.entity.GameSession
 
 /**
  * Util for websockets
@@ -11,11 +12,15 @@ import com.google.gson.Gson
 
 private val logger = LoggerFactory.getLogger("com.sordle.watpadsCardDeck.controller.GameWebSocketHandler")
 
-val WebSocketSession.gameId: Long
-    get() = attributes["gameId"] as Long
+val WebSocketSession.game: GameSession
+    get() = attributes["game"] as GameSession
 
 val WebSocketSession.userId: Long
     get() = attributes["userId"] as Long
+
+fun WebSocketSession.setGame(game: GameSession) {
+    attributes["game"] = game
+}
 
 fun WebSocketSession.sendObjectMessage(obj: Any) {
     // Might be more efficient to have a project wide deserializer

@@ -6,7 +6,7 @@ import com.sordle.watpadsCardDeck.entity.GameStates
 import com.sordle.watpadsCardDeck.entity.Player
 import com.sordle.watpadsCardDeck.exception.NotFoundException
 import com.sordle.watpadsCardDeck.model.*
-import com.sordle.watpadsCardDeck.repository.GameQueueRepository
+import com.sordle.watpadsCardDeck.repository.LobbyRepository
 import com.sordle.watpadsCardDeck.repository.GameRepository
 import com.sordle.watpadsCardDeck.util.*
 import org.springframework.stereotype.Service
@@ -15,10 +15,10 @@ import org.springframework.web.socket.WebSocketSession
 
 @Service
 class GameService(
-    private val gameQueueRepository: GameQueueRepository,
+    private val lobbyRepository: LobbyRepository,
     private val gameRepository: GameRepository,
     private val userService: UserService,
-    private val gameSessionManager: GameSessionManager
+    private val gameSessionManager: SessionManager
 ) {
     private final val numCardsInStartingDeck = 9
     private final val fullHandSize = 3
@@ -27,36 +27,40 @@ class GameService(
      * Finds the oldest queued game waiting for a player or create one if it doesn't exist.
      * Joining game is accomplished through connecting to websocket with returned gameId
      */
-    fun getGameToJoin() : Long{
-        val openGames = gameQueueRepository.findAllByOrderByCreatedDateAsc()
+    fun getGameToJoin() : Lobby{
+        val openGames = lobbyRepository.findAllByOrderByCreatedDateAsc()
         return if (openGames.isEmpty()){
             createNewGameInQueue()
         } else {
-            openGames[0].gameId
+            openGames[0]
         }
     }
 
     /**
-     * Connects a player to a game after a successful websocket connection
+     * Inserts a player into a lobby after a successful websocket connection or
+     * to a game if joining the lobby would cause it to be full
      */
     @Transactional
     fun joinGame(session: WebSocketSession){
-        val queuedGame = getQueuedGame(session.gameId)
-        if (queuedGame.playerOne == null){
-            queuedGame.playerOne = Player(
+        val lobby = session.game as Lobby
+        if (lobby.playerOne == null){
+            lobby.playerOne = Player(
                 user = userService.getUser(session.userId)
             )
         } else{
-            queuedGame.playerTwo = Player(
+            lobby.playerTwo = Player(
                 user = userService.getUser(session.userId)
             )
 
-            val game = gameRepository.save(
-                Game(queuedGame)
+            session.setGame(
+                gameRepository.save(
+                    Game(lobby)
+                )
             )
-            gameQueueRepository.delete(queuedGame)
 
-            gameSessionManager.sendMessageToGame(session.gameId, GameResponse(game))
+            lobbyRepository.delete(lobby)
+
+            gameSessionManager.sendMessageToGame(session.game.gameId, GameResponse(session.game as Game))
         }
     }
 
@@ -67,7 +71,7 @@ class GameService(
     }
 
     fun getQueuedGame(gameId: Long): Lobby{
-        val gameQueue = gameQueueRepository.findById(gameId).orElse(null)
+        val gameQueue = lobbyRepository.findById(gameId).orElse(null)
         gameQueue?: throw NotFoundException(errorMessage =  "No game queue found with provided Id")
         return gameQueue
     }
@@ -77,7 +81,7 @@ class GameService(
      */
     @Transactional
     fun setTrump(session: WebSocketSession, playCardRequest: PlayCardRequest){
-        val game = getGame(session.gameId)
+        val game = session.game as Game
         val player = findPlayerInGame(game, session.userId)
 
         if (player.trumpCard == null){
@@ -86,7 +90,7 @@ class GameService(
 
         if (game.playerOne.trumpCard != null && game.playerTwo.trumpCard != null){
             game.gameState = GameStates.DraftingCards
-            gameSessionManager.sendMessageToGame(session.gameId, GameResponse(game))
+            gameSessionManager.sendMessageToGame(game.gameId, GameResponse(game))
         }
     }
 
@@ -95,7 +99,7 @@ class GameService(
      */
     @Transactional
     fun addCardsToDeck(session: WebSocketSession, addCardsRequest: AddCardsRequest){
-        val game = getGame(session.gameId)
+        val game = session.game as Game
         val player = findPlayerInGame(game, session.userId)
 
         if (player.cardsAddedToDeck.isEmpty()) {
@@ -108,7 +112,7 @@ class GameService(
             game.currentDeck.addAll(game.startingDeck)
             distributeHands(game)
             game.gameState = GameStates.PlayingCards
-            gameSessionManager.sendMessageToGame(session.gameId, GameResponse(game))
+            gameSessionManager.sendMessageToGame(game.gameId, GameResponse(game))
         }
     }
 
@@ -117,7 +121,7 @@ class GameService(
      */
     @Transactional
     fun playCard(session: WebSocketSession, playCardRequest: PlayCardRequest){
-        val game = getGame(session.gameId)
+        val game = session.game as Game
         val player = findPlayerInGame(game, session.userId)
         if (player.move == null){
             player.hand.remove(playCardRequest.card)
@@ -135,10 +139,10 @@ class GameService(
      * Creates a game with a single player,
      * leaving it ready to be joined by another player
      */
-    private fun createNewGameInQueue() : Long{
-        return gameQueueRepository.save(
+    private fun createNewGameInQueue() : Lobby{
+        return lobbyRepository.save(
             Lobby()
-        ).gameId
+        )
     }
 
     /**

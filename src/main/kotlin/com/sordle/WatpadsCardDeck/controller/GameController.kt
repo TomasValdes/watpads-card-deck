@@ -16,6 +16,6 @@ class GameController(
 ){
     @GetMapping()
     fun getGameToJoin(): ResponseEntity<Long>{
-        return ResponseEntity.ok(gameService.getGameToJoin())
+        return ResponseEntity.ok(gameService.getGameToJoin().gameId)
     }
 }

@@ -25,7 +25,7 @@ class MessageServiceTest {
         testConfig.testWebSocketGameSession.setGame(selectingTrumpTestGame)
         every { gameService.setTrump(testConfig.testWebSocketGameSession, any()) } just runs
 
-        messageService.handleMessage(testConfig.testWebSocketGameSession, selectTrumpTestMessage)
+        messageService.handleMessageToGame(testConfig.testWebSocketGameSession, selectTrumpTestMessage)
 
         verify(exactly = 1) { gameService.setTrump(testConfig.testWebSocketGameSession, any()) }
     }
@@ -35,7 +35,7 @@ class MessageServiceTest {
         testConfig.testWebSocketGameSession.setGame(draftingCardsTestGame)
         every { gameService.addCardsToDeck(testConfig.testWebSocketGameSession, any()) } just runs
 
-        messageService.handleMessage(testConfig.testWebSocketGameSession, draftCardsTestMessage)
+        messageService.handleMessageToGame(testConfig.testWebSocketGameSession, draftCardsTestMessage)
 
         verify(exactly = 1) { gameService.addCardsToDeck(testConfig.testWebSocketGameSession, any()) }
     }
@@ -45,7 +45,7 @@ class MessageServiceTest {
         testConfig.testWebSocketGameSession.setGame(playingCardsTestGame)
         every { gameService.playCard(testConfig.testWebSocketGameSession, any()) } just runs
 
-        messageService.handleMessage(testConfig.testWebSocketGameSession, selectTrumpTestMessage)
+        messageService.handleMessageToGame(testConfig.testWebSocketGameSession, selectTrumpTestMessage)
 
         verify(exactly = 1) { gameService.playCard(testConfig.testWebSocketGameSession, any()) }
     }
@@ -53,7 +53,7 @@ class MessageServiceTest {
     @Test
     fun `handle unexpected message`() {
         val exception = assertThrows<UnsupportedOperationException> {
-            messageService.handleMessage(testConfig.testWebSocketGameSession, selectTrumpTestMessage)
+            messageService.handleMessageToGame(testConfig.testWebSocketGameSession, selectTrumpTestMessage)
         }
 
         assertEquals(exception.message, "Unexpected message received")
@@ -62,7 +62,7 @@ class MessageServiceTest {
     @Test
     fun `handle incorrectly formatted message`() {
         val exception = assertThrows<UnsupportedOperationException> {
-            messageService.handleMessage(testConfig.testWebSocketGameSession, "{}")
+            messageService.handleMessageToGame(testConfig.testWebSocketGameSession, "{}")
         }
 
         assertEquals(exception.message, "Unexpected message received")
