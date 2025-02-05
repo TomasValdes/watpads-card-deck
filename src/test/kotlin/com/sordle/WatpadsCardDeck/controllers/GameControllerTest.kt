@@ -19,9 +19,11 @@ class GameControllerTest(@Autowired val mockMvc: MockMvc) {
     @MockkBean
     lateinit var gameService: GameService
 
+    private val testConfig = TestConfig()
+
     @Test
     fun `get game to join returns 200`() {
-        every { gameService.getGameToJoin() } returns TestConfig.testGame.gameId
+        every { gameService.getGameToJoin() } returns testConfig.testLobby
 
         mockMvc.perform(
             get("/game")
