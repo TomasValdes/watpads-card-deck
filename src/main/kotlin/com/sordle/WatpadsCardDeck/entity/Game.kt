@@ -19,8 +19,6 @@ interface GameSession {
  * General game flow should go down the line as they appear in order
  */
 enum class GameStates {
-    // status to signify game isn't ready to start
-    WaitingForPlayers,
 
     // select the card you want to win with
     SelectingTrump,
@@ -46,7 +44,7 @@ data class Game (
     @Id
     override val gameId: Long = 0,
 
-    var gameState: GameStates = GameStates.WaitingForPlayers,
+    var gameState: GameStates = GameStates.SelectingTrump,
 
     @ElementCollection
     val startingDeck: MutableList<Cards> = mutableListOf(),
