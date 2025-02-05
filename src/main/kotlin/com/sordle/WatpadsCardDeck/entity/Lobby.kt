@@ -11,14 +11,14 @@ import java.time.LocalDateTime
 data class Lobby (
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val gameId: Long = 0,
+    override val gameId: Long = 0,
 
     @OneToOne
-    var playerOne: Player? = null,
+    override var playerOne: Player? = null,
 
     @OneToOne
-    var playerTwo: Player? = null,
+    override var playerTwo: Player? = null,
 
     @CreatedDate
     val createdDate: LocalDateTime = LocalDateTime.now()
-)
+) : GameSession

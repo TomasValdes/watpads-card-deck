@@ -6,6 +6,15 @@ import org.springframework.data.annotation.CreatedDate
 import java.time.LocalDateTime
 
 /**
+ * A shared interface between a Lobby and a Game
+ */
+interface GameSession {
+    val gameId: Long
+    val playerOne: Player?
+    val playerTwo: Player?
+}
+
+/**
  * Represents the states that the game could be in.
  * General game flow should go down the line as they appear in order
  */
@@ -35,7 +44,7 @@ enum class GameStates {
 @Entity
 data class Game (
     @Id
-    val gameId: Long = 0,
+    override val gameId: Long = 0,
 
     var gameState: GameStates = GameStates.WaitingForPlayers,
 
@@ -51,7 +60,7 @@ data class Game (
         AttributeOverride(name = "trumpCard", column = Column(name = "player_one_trump_card")),
         AttributeOverride(name = "playerHand", column = Column(name = "player_one_hand"))
     )
-    val playerOne: Player = Player(),
+    override val playerOne: Player = Player(),
 
     @OneToOne
     @AttributeOverrides(
@@ -59,7 +68,7 @@ data class Game (
         AttributeOverride(name = "trumpCard", column = Column(name = "player_two_trump_card")),
         AttributeOverride(name = "playerHand", column = Column(name = "player_two_hand"))
     )
-    val playerTwo: Player = Player(),
+    override val playerTwo: Player = Player(),
 
     @OneToOne
     @JoinColumn(name = "winner_user_id")
@@ -67,7 +76,7 @@ data class Game (
 
     @CreatedDate
     val createdDate: LocalDateTime = LocalDateTime.now()
-    ){
+) : GameSession {
     constructor(gameQueue: Lobby) : this(
         gameId = gameQueue.gameId,
         playerOne = gameQueue.playerOne!!,
