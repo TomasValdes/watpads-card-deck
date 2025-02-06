@@ -5,6 +5,7 @@ import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import com.google.gson.Gson
 import com.sordle.watpadsCardDeck.entity.GameSession
+import com.sordle.watpadsCardDeck.entity.User
 
 /**
  * Util for websockets
@@ -20,6 +21,10 @@ val WebSocketSession.userId: Long
 
 fun WebSocketSession.setGame(game: GameSession) {
     attributes["game"] = game
+}
+
+fun WebSocketSession.setUser(user: User){
+    attributes["userId"] = user.userId
 }
 
 fun WebSocketSession.sendObjectMessage(obj: Any) {
