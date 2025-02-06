@@ -6,12 +6,14 @@ import com.sordle.watpadsCardDeck.model.UserRequest
 import com.sordle.watpadsCardDeck.model.toEntity
 import com.sordle.watpadsCardDeck.repository.UserRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
 class UserService (
         private val userProfileRepository: UserRepository
 ){
+    @Transactional
     fun getUser(userId : Long): User {
         val user = userProfileRepository.findById(userId).orElse(null)
         user?: throw NotFoundException(errorMessage =  "No user found with provided Id")

@@ -47,6 +47,8 @@ class GameService(
             lobby.playerOne = Player(
                 user = userService.getUser(session.userId)
             )
+
+            lobbyRepository.save(lobby)
         } else{
             lobby.playerTwo = Player(
                 user = userService.getUser(session.userId)
