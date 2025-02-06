@@ -13,10 +13,10 @@ data class Lobby (
     @GeneratedValue(strategy = GenerationType.AUTO)
     override val gameId: Long = 0,
 
-    @OneToOne(cascade = [CascadeType.ALL])
+    @OneToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
     override var playerOne: Player? = null,
 
-    @OneToOne(cascade = [CascadeType.ALL])
+    @OneToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
     override var playerTwo: Player? = null,
 
     @CreatedDate

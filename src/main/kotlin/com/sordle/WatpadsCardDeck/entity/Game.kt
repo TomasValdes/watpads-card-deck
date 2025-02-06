@@ -52,7 +52,7 @@ data class Game (
     @ElementCollection
     val currentDeck: MutableList<Cards> = mutableListOf(),
 
-    @OneToOne
+    @OneToOne(cascade = [CascadeType.ALL])
     @AttributeOverrides(
         AttributeOverride(name = "userId", column = Column(name = "player_one_user_id")),
         AttributeOverride(name = "trumpCard", column = Column(name = "player_one_trump_card")),
@@ -60,7 +60,7 @@ data class Game (
     )
     override val playerOne: Player = Player(),
 
-    @OneToOne
+    @OneToOne(cascade = [CascadeType.ALL])
     @AttributeOverrides(
         AttributeOverride(name = "userId", column = Column(name = "player_two_user_id")),
         AttributeOverride(name = "trumpCard", column = Column(name = "player_two_trump_card")),
