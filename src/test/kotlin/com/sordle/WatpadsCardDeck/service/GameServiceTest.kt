@@ -13,12 +13,12 @@ import org.springframework.web.socket.adapter.standard.StandardWebSocketSession
 import kotlin.test.assertEquals
 
 class GameServiceTest {
-    private val gameQueueRepository: LobbyRepository = mockk()
+    private val lobbyRepository: LobbyRepository = mockk()
     private val gameRepository: GameRepository = mockk()
     private val userRepository: UserRepository = mockk()
     private val userService = UserService(userRepository)
     private val gameSessionManager: SessionManager = mockk()
-    private val gameService = GameService(gameQueueRepository, gameRepository,
+    private val gameService = GameService(lobbyRepository, gameRepository,
         userService, gameSessionManager)
 
     private val testConfig = TestConfig()
@@ -31,16 +31,17 @@ class GameServiceTest {
 
     @Test
     fun `create new game in queue`() {
-        every { gameQueueRepository.findAllByOrderByCreatedDateAsc()} answers { emptyList() }
-        every { gameQueueRepository.save(any()) } answers { testConfig.testLobby }
+        every { lobbyRepository.findAllByOrderByCreatedDateAsc()} answers { emptyList() }
+        every { lobbyRepository.save(any()) } answers {testConfig.testLobby}
 
         assertEquals(testConfig.testLobby, gameService.getGameToJoin())
-        verify(exactly = 1) { gameQueueRepository.save(any()) }
+        verify(exactly = 1) { lobbyRepository.save(any()) }
     }
 
     @Test
     fun `join game in queue as player 1`() { 
         every { userService.getUser(testConfig.testUser.userId) } answers {testConfig.testUser}
+        every { lobbyRepository.save(any()) } answers { testConfig.testLobby }
         gameService.joinGame(testConfig.testWebSocketLobbySession)
 
         assertEquals(testConfig.testUser, testConfig.testLobby.playerOne!!.user)
@@ -52,13 +53,13 @@ class GameServiceTest {
 
         every { userService.getUser(testConfig.testUserTwo.userId) } answers {testConfig.testUserTwo}
         every { gameRepository.save(any()) } answers {testConfig.testGame}
-        every { gameQueueRepository.delete(testConfig.testLobby) } just runs
+        every { lobbyRepository.delete(testConfig.testLobby) } just runs
         every { gameSessionManager.sendMessageToGame(testConfig.testGame.gameId,
             GameResponse(testConfig.testGame)) } just runs
 
         gameService.joinGame(testWebSocketSessionTwo)
 
-        verify(exactly = 1) { gameQueueRepository.delete(testConfig.testLobby) }
+        verify(exactly = 1) { lobbyRepository.delete(testConfig.testLobby) }
         verify(exactly = 1) { gameRepository.save(any()) }
     }
 }
