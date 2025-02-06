@@ -6,6 +6,7 @@ import com.sordle.watpadsCardDeck.model.UserRequest
 import com.sordle.watpadsCardDeck.model.toEntity
 import com.sordle.watpadsCardDeck.repository.UserRepository
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class UserService (
@@ -19,5 +20,16 @@ class UserService (
 
     fun createUser(userRequest : UserRequest) {
         userProfileRepository.save(userRequest.toEntity())
+    }
+
+    /**
+     * Temporary method for testing. Rework needed for creating user who doesn't log in.
+     */
+    fun createAnonymousUser(): User {
+        return userProfileRepository.save(
+            User(
+                userName = "Anonymous User " + UUID.randomUUID().toString(),
+            )
+        )
     }
 }

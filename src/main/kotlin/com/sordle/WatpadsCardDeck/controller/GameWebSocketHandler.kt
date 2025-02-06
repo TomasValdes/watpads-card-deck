@@ -3,8 +3,11 @@ package com.sordle.watpadsCardDeck.controller
 import com.sordle.watpadsCardDeck.entity.Game
 import com.sordle.watpadsCardDeck.service.GameService
 import com.sordle.watpadsCardDeck.service.MessageService
+import com.sordle.watpadsCardDeck.service.UserService
 import com.sordle.watpadsCardDeck.util.SessionManager
 import com.sordle.watpadsCardDeck.util.game
+import com.sordle.watpadsCardDeck.util.setGame
+import com.sordle.watpadsCardDeck.util.setUser
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus
@@ -16,10 +19,11 @@ import org.springframework.web.socket.WebSocketSession
  * Handles websocket that is used to play through game
  */
 @Component
-class GameWebSocketHandler (
+class GameWebSocketHandler(
     private val gameService: GameService,
     private val messageService: MessageService,
-    private val gameSessionManager: SessionManager
+    private val gameSessionManager: SessionManager,
+    private val userService: UserService
 ) : TextWebSocketHandler() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -33,7 +37,12 @@ class GameWebSocketHandler (
      * Finds a game for given session then associates the session with the game
      */
     override fun afterConnectionEstablished(session: WebSocketSession) {
-        session.attributes["lobby"] = gameService.getGameToJoin()
+        /**
+         * Temporary work around until security is implemented
+         * Currently, every session will create a new anonymous user
+         */
+        session.setUser(userService.createAnonymousUser())
+        session.setGame(gameService.getGameToJoin())
         gameSessionManager.addSession(session.game.gameId, session)
         gameService.joinGame(session)
         logger.info("User with session id ${session.id} connected")
