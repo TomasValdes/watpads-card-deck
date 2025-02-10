@@ -27,6 +27,7 @@ class GameService(
      * Finds the oldest queued game waiting for a player or create one if it doesn't exist.
      * Joining game is accomplished through connecting to websocket with returned gameId
      */
+    @Transactional
     fun getGameToJoin() : Lobby{
         val openGames = lobbyRepository.findAllByOrderByCreatedDateAsc()
         return if (openGames.isEmpty()){
@@ -40,7 +41,7 @@ class GameService(
      * Inserts a player into a lobby after a successful websocket connection or
      * to a game if joining the lobby would cause it to be full
      */
-    @Transactional
+    @Transactional(propagation = Propagation.MANDATORY)
     fun joinGame(session: WebSocketSession){
         val lobby = session.game as Lobby
         if (lobby.playerOne == null){
@@ -48,7 +49,7 @@ class GameService(
                 user = userService.getUser(session.userId)
             )
 
-            lobbyRepository.save(lobby)
+//            lobbyRepository.save(lobby)
         } else{
             lobby.playerTwo = Player(
                 user = userService.getUser(session.userId)

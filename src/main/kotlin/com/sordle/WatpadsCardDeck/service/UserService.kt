@@ -10,10 +10,10 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
+@Transactional
 class UserService (
         private val userProfileRepository: UserRepository
 ){
-    @Transactional
     fun getUser(userId : Long): User {
         val user = userProfileRepository.findById(userId).orElse(null)
         user?: throw NotFoundException(errorMessage =  "No user found with provided Id")
