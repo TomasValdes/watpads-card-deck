@@ -9,7 +9,9 @@ import com.sordle.watpadsCardDeck.model.*
 import com.sordle.watpadsCardDeck.repository.LobbyRepository
 import com.sordle.watpadsCardDeck.repository.GameRepository
 import com.sordle.watpadsCardDeck.util.*
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.socket.WebSocketSession
 
@@ -20,8 +22,11 @@ class GameService(
     private val userService: UserService,
     private val gameSessionManager: SessionManager
 ) {
-    private final val numCardsInStartingDeck = 9
+    private final val numCardsAddedByEachPlayer = 3
+    private final val numCardsInStartingDeck = 3 + numCardsAddedByEachPlayer * 2
     private final val fullHandSize = 3
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     /**
      * Finds the oldest queued game waiting for a player or create one if it doesn't exist.
@@ -31,7 +36,7 @@ class GameService(
     fun getGameToJoin() : Lobby{
         val openGames = lobbyRepository.findAllByOrderByCreatedDateAsc()
         return if (openGames.isEmpty()){
-            createNewGameInQueue()
+            createLobby()
         } else {
             openGames[0]
         }
@@ -73,7 +78,7 @@ class GameService(
         return game
     }
 
-    fun getQueuedGame(gameId: Long): Lobby{
+    fun getLobby(gameId: Long): Lobby{
         val gameQueue = lobbyRepository.findById(gameId).orElse(null)
         gameQueue?: throw NotFoundException(errorMessage =  "No game queue found with provided Id")
         return gameQueue
@@ -105,13 +110,14 @@ class GameService(
         val game = session.game as Game
         val player = findPlayerInGame(game, session.userId)
 
-        if (player.cardsAddedToDeck.isEmpty()) {
+        if (player.cardsAddedToDeck.isEmpty() && addCardsRequest.cardsToAdd.size == numCardsAddedByEachPlayer) {
             player.cardsAddedToDeck.addAll(addCardsRequest.cardsToAdd)
             game.startingDeck.addAll(addCardsRequest.cardsToAdd)
+        } else {
+            logger.warn("Cannot add cards $addCardsRequest in request by user $session.userId")
         }
 
-        if (game.startingDeck.size >= numCardsInStartingDeck &&
-            game.playerOne.cardsAddedToDeck.isNotEmpty() && game.playerTwo.cardsAddedToDeck.isNotEmpty()) {
+        if (game.startingDeck.size >= numCardsInStartingDeck) {
             game.currentDeck.addAll(game.startingDeck)
             distributeHands(game)
             game.gameState = GameStates.PlayingCards
@@ -134,6 +140,7 @@ class GameService(
         if (game.playerOne.move != null && game.playerTwo.move != null) {
             game.gameState = GameStates.RevealingCards
             gameSessionManager.sendMessageToGame(game.gameId, GameResponse(game))
+            gameRepository.save(game)
             evaluateMoves(game)
         }
     }
@@ -142,7 +149,7 @@ class GameService(
      * Creates a game with a single player,
      * leaving it ready to be joined by another player
      */
-    private fun createNewGameInQueue() : Lobby{
+    private fun createLobby() : Lobby{
         return lobbyRepository.save(
             Lobby()
         )
