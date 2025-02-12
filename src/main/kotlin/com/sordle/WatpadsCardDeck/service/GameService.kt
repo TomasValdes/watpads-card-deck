@@ -66,14 +66,14 @@ class GameService(
     }
 
     fun getGame(gameId: Long): Game? {
-        val game = gameRepository.findById(gameId).orElse(null)
+        val game = gameRepository.findGameByGameId(gameId)
         if (game == null)
             logger.warn("No game found for gameId: $gameId")
         return game
     }
 
     fun getLobby(gameId: Long): Lobby? {
-        val lobby = lobbyRepository.findById(gameId).orElse(null)
+        val lobby = lobbyRepository.findLobbyByGameId(gameId)
         if (lobby == null)
             logger.warn("No lobby found for gameId: $gameId")
         return lobby
