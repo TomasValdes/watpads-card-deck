@@ -34,7 +34,15 @@ class SessionManager {
     }
 
     fun endGameSessions(gameId: Long){
+        val sessions = getSessions(gameId)?.toList() ?: return
+        sessions.forEach { s -> s.close(CloseStatus(1000))}
+        gameSessions.remove(gameId)
+    }
+
+    fun sendMessageToPlayerInGame(gameId: Long, userId: Long, obj: Any){
         val sessions = getSessions(gameId)
-        sessions?.forEach { s -> s.close(CloseStatus(1000))}
+        if (sessions != null) {
+            sessions.find { s -> s.userId == userId }?.sendObjectMessage(obj)
+        }
     }
 }
