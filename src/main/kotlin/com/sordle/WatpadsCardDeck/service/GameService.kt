@@ -200,7 +200,7 @@ class GameService(
         playerTwo.move = null
 
         // Continue game if no winner was found
-        if(game.gameState != GameStates.GameResults){
+        if(game.gameState != GameStates.Completed){
             // Check if player hands need to be refilled
             if (playerOne.hand.size == 0 && playerTwo.hand.size == 0){
                 distributeHands(game)
@@ -225,7 +225,7 @@ class GameService(
 
     private fun handlePlayerVictory(player: Player, game: Game){
         game.winner = player
-        game.gameState = GameStates.GameResults
+        game.gameState = GameStates.Completed
         gameSessionManager.sendMessageToGame(game.gameId, GameResponse(game))
         gameSessionManager.endGameSessions(game.gameId)
     }

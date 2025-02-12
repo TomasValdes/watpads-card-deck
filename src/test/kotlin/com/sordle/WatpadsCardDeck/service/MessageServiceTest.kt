@@ -56,7 +56,7 @@ class MessageServiceTest {
 
     @Test
     fun `handle unexpected message`() {
-        testConfig.testGame.gameState = GameStates.GameResults
+        testConfig.testGame.gameState = GameStates.Completed
         every { gameService.getGame(testConfig.testWebSocketGameSession.gameId) } answers {testConfig.testGame}
         val exception = assertThrows<UnsupportedOperationException> {
             messageService.handleMessageToGame(testConfig.testWebSocketGameSession, selectTrumpTestMessage)
