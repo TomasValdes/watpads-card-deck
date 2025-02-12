@@ -12,7 +12,8 @@ data class GameResponse (
     val playerOneUserId: Long,
     val playerTwoUserId: Long,
     val playerOneMove: Cards?,
-    val playerTwoMove: Cards?
+    val playerTwoMove: Cards?,
+    val winner: Long?
     ) {
     constructor(game: Game) : this(
         gameId = game.gameId,
@@ -20,6 +21,7 @@ data class GameResponse (
         playerOneUserId = game.playerOne.user.userId,
         playerTwoUserId = game.playerTwo.user.userId,
         playerOneMove = game.playerOne.move,
-        playerTwoMove = game.playerTwo.move
+        playerTwoMove = game.playerTwo.move,
+        winner = game.winner?.user?.userId
     )
 }
