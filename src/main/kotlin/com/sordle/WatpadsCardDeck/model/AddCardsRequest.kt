@@ -5,7 +5,7 @@ import com.google.gson.JsonObject
 /**
  * Message sent in the drafting cards phase to add to starting deck
  *
- * Syntax: {"card" : [[card]]}
+ * Syntax: {"card" : [[Cards]]}
  */
 data class AddCardsRequest (
     val cardsToAdd : List<Cards>
