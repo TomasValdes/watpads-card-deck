@@ -30,14 +30,14 @@ class TestConfig {
 
     var testWebSocketLobbySession: WebSocketSession = StandardWebSocketSession(
         null,
-        mapOf("game" to testLobby, "userId" to testUser.userId),
+        mapOf("gameId" to testLobby.gameId, "userId" to testUser.userId),
         null,
         null
     )
 
     var testWebSocketGameSession: WebSocketSession = StandardWebSocketSession(
         null,
-        mapOf("game" to testGame, "userId" to testUser.userId),
+        mapOf("gameId" to testGame.gameId, "userId" to testUser.userId),
         null,
         null
     )

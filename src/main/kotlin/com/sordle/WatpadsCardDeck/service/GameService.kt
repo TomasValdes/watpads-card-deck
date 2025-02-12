@@ -4,7 +4,6 @@ import com.sordle.watpadsCardDeck.entity.Game
 import com.sordle.watpadsCardDeck.entity.Lobby
 import com.sordle.watpadsCardDeck.entity.GameStates
 import com.sordle.watpadsCardDeck.entity.Player
-import com.sordle.watpadsCardDeck.exception.NotFoundException
 import com.sordle.watpadsCardDeck.model.*
 import com.sordle.watpadsCardDeck.repository.LobbyRepository
 import com.sordle.watpadsCardDeck.repository.GameRepository
@@ -48,48 +47,44 @@ class GameService(
      */
     @Transactional(propagation = Propagation.MANDATORY)
     fun joinGame(session: WebSocketSession){
-        val lobby = session.game as Lobby
+        val lobby = getLobby(session.gameId)!!
         if (lobby.playerOne == null){
             lobby.playerOne = Player(
                 user = userService.getUser(session.userId)
             )
-
-//            lobbyRepository.save(lobby)
         } else{
             lobby.playerTwo = Player(
                 user = userService.getUser(session.userId)
             )
 
-            session.setGame(
-                gameRepository.save(
-                    Game(lobby)
-                )
-            )
+            val game = gameRepository.save(Game(lobby))
 
             lobbyRepository.delete(lobby)
 
-            gameSessionManager.sendMessageToGame(session.game.gameId, GameResponse(session.game as Game))
+            gameSessionManager.sendMessageToGame(session.gameId, GameResponse(game))
         }
     }
 
-    fun getGame(gameId: Long): Game{
+    fun getGame(gameId: Long): Game? {
         val game = gameRepository.findById(gameId).orElse(null)
-        game?: throw NotFoundException(errorMessage =  "No game found with provided Id")
+        if (game == null)
+            logger.warn("No game found for gameId: $gameId")
         return game
     }
 
-    fun getLobby(gameId: Long): Lobby{
-        val gameQueue = lobbyRepository.findById(gameId).orElse(null)
-        gameQueue?: throw NotFoundException(errorMessage =  "No game queue found with provided Id")
-        return gameQueue
+    fun getLobby(gameId: Long): Lobby? {
+        val lobby = lobbyRepository.findById(gameId).orElse(null)
+        if (lobby == null)
+            logger.warn("No lobby found for gameId: $gameId")
+        return lobby
     }
 
     /**
      * Sets the trump for a player in a game both gotten from the given session
      */
-    @Transactional
+    @Transactional(propagation = Propagation.MANDATORY)
     fun setTrump(session: WebSocketSession, playCardRequest: PlayCardRequest){
-        val game = session.game as Game
+        val game = getGame(session.gameId)!!
         val player = findPlayerInGame(game, session.userId)
 
         if (player.trumpCard == null){
@@ -105,9 +100,9 @@ class GameService(
     /**
      * Adds given cards to starter deck for a game from the given session
      */
-    @Transactional
+    @Transactional(propagation = Propagation.MANDATORY)
     fun addCardsToDeck(session: WebSocketSession, addCardsRequest: AddCardsRequest){
-        val game = session.game as Game
+        val game = getGame(session.gameId)!!
         val player = findPlayerInGame(game, session.userId)
 
         if (player.cardsAddedToDeck.isEmpty() && addCardsRequest.cardsToAdd.size == numCardsAddedByEachPlayer) {
@@ -128,9 +123,9 @@ class GameService(
     /**
      * Handles logic for playing given card for a player in a game both gotten from the given session
      */
-    @Transactional
+    @Transactional(propagation = Propagation.MANDATORY)
     fun playCard(session: WebSocketSession, playCardRequest: PlayCardRequest){
-        val game = session.game as Game
+        val game = getGame(session.gameId)!!
         val player = findPlayerInGame(game, session.userId)
         if (player.move == null){
             player.hand.remove(playCardRequest.card)

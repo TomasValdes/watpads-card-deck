@@ -13,14 +13,14 @@ import com.sordle.watpadsCardDeck.entity.User
 
 private val logger = LoggerFactory.getLogger("com.sordle.watpadsCardDeck.controller.GameWebSocketHandler")
 
-val WebSocketSession.game: GameSession
-    get() = attributes["game"] as GameSession
+val WebSocketSession.gameId: Long
+    get() = attributes["gameId"] as Long
 
 val WebSocketSession.userId: Long
     get() = attributes["userId"] as Long
 
 fun WebSocketSession.setGame(game: GameSession) {
-    attributes["game"] = game
+    attributes["gameId"] = game.gameId
 }
 
 fun WebSocketSession.setUser(user: User){

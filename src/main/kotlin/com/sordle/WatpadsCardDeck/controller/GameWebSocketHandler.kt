@@ -1,13 +1,9 @@
 package com.sordle.watpadsCardDeck.controller
 
-import com.sordle.watpadsCardDeck.entity.Game
 import com.sordle.watpadsCardDeck.service.GameService
 import com.sordle.watpadsCardDeck.service.MessageService
 import com.sordle.watpadsCardDeck.service.UserService
-import com.sordle.watpadsCardDeck.util.SessionManager
-import com.sordle.watpadsCardDeck.util.game
-import com.sordle.watpadsCardDeck.util.setGame
-import com.sordle.watpadsCardDeck.util.setUser
+import com.sordle.watpadsCardDeck.util.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -45,21 +41,21 @@ class GameWebSocketHandler(
          */
         session.setUser(userService.createAnonymousUser())
         session.setGame(gameService.getGameToJoin())
-        gameSessionManager.addSession(session.game.gameId, session)
+        gameSessionManager.addSession(session.gameId, session)
         gameService.joinGame(session)
         logger.info("User with session id ${session.id} connected")
     }
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
-        gameSessionManager.removeSession(session.game.gameId, session)
+        gameSessionManager.removeSession(session.gameId, session)
         logger.info("User with session id ${session.id} disconnected")
     }
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         logger.info("Received message ${message.payload}")
-        if (session.game is Game)
-            messageService.handleMessageToGame(session, message.toString())
+        if (gameService.getGame(session.gameId) != null)
+            messageService.handleMessageToGame(session, message.payload)
         else
-            logger.info("Message from lobby ${session.game.gameId} ignored")
+            logger.info("Message from lobby ${session.gameId} ignored")
     }
 }

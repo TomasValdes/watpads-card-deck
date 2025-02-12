@@ -6,6 +6,7 @@ import com.sordle.watpadsCardDeck.repository.LobbyRepository
 import com.sordle.watpadsCardDeck.repository.GameRepository
 import com.sordle.watpadsCardDeck.repository.UserRepository
 import com.sordle.watpadsCardDeck.util.SessionManager
+import com.sordle.watpadsCardDeck.util.gameId
 import io.mockk.*
 import org.junit.jupiter.api.Test
 import org.springframework.web.socket.WebSocketSession
@@ -24,7 +25,7 @@ class GameServiceTest {
     private val testConfig = TestConfig()
     private val testWebSocketSessionTwo: WebSocketSession = StandardWebSocketSession(
         null,
-        mapOf("game" to testConfig.testLobby, "userId" to testConfig.testUserTwo.userId),
+        mapOf("gameId" to testConfig.testLobby.gameId, "userId" to testConfig.testUserTwo.userId),
         null,
         null
     )
@@ -39,7 +40,8 @@ class GameServiceTest {
     }
 
     @Test
-    fun `join game in queue as player 1`() { 
+    fun `join game in queue as player 1`() {
+        every { gameService.getLobby(testConfig.testWebSocketLobbySession.gameId) } answers {testConfig.testLobby}
         every { userService.getUser(testConfig.testUser.userId) } answers {testConfig.testUser}
         every { lobbyRepository.save(any()) } answers { testConfig.testLobby }
         gameService.joinGame(testConfig.testWebSocketLobbySession)
@@ -51,6 +53,7 @@ class GameServiceTest {
     fun `create new game`() {
         `join game in queue as player 1`()
 
+        every { gameService.getLobby(testWebSocketSessionTwo.gameId) } answers {testConfig.testLobby}
         every { userService.getUser(testConfig.testUserTwo.userId) } answers {testConfig.testUserTwo}
         every { gameRepository.save(any()) } answers {testConfig.testGame}
         every { lobbyRepository.delete(testConfig.testLobby) } just runs

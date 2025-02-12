@@ -1,9 +1,8 @@
 package com.sordle.watpadsCardDeck.service
 
 import com.sordle.watpadsCardDeck.TestConfig
-import com.sordle.watpadsCardDeck.entity.Game
 import com.sordle.watpadsCardDeck.entity.GameStates
-import com.sordle.watpadsCardDeck.util.game
+import com.sordle.watpadsCardDeck.util.gameId
 import com.sordle.watpadsCardDeck.util.setGame
 import io.mockk.*
 import org.junit.jupiter.api.Test
@@ -25,6 +24,7 @@ class MessageServiceTest {
     @Test
     fun `handle set trump message`() {
         testConfig.testWebSocketGameSession.setGame(selectingTrumpTestGame)
+        every { gameService.getGame(testConfig.testWebSocketGameSession.gameId) } answers {selectingTrumpTestGame}
         every { gameService.setTrump(testConfig.testWebSocketGameSession, any()) } just runs
 
         messageService.handleMessageToGame(testConfig.testWebSocketGameSession, selectTrumpTestMessage)
@@ -35,6 +35,7 @@ class MessageServiceTest {
     @Test
     fun `handle add card message`() {
         testConfig.testWebSocketGameSession.setGame(draftingCardsTestGame)
+        every { gameService.getGame(testConfig.testWebSocketGameSession.gameId) } answers {draftingCardsTestGame}
         every { gameService.addCardsToDeck(testConfig.testWebSocketGameSession, any()) } just runs
 
         messageService.handleMessageToGame(testConfig.testWebSocketGameSession, draftCardsTestMessage)
@@ -45,6 +46,7 @@ class MessageServiceTest {
     @Test
     fun `handle play card message`() {
         testConfig.testWebSocketGameSession.setGame(playingCardsTestGame)
+        every { gameService.getGame(testConfig.testWebSocketGameSession.gameId) } answers {playingCardsTestGame}
         every { gameService.playCard(testConfig.testWebSocketGameSession, any()) } just runs
 
         messageService.handleMessageToGame(testConfig.testWebSocketGameSession, selectTrumpTestMessage)
@@ -54,7 +56,8 @@ class MessageServiceTest {
 
     @Test
     fun `handle unexpected message`() {
-        (testConfig.testWebSocketGameSession.game as Game).gameState = GameStates.GameResults
+        testConfig.testGame.gameState = GameStates.GameResults
+        every { gameService.getGame(testConfig.testWebSocketGameSession.gameId) } answers {testConfig.testGame}
         val exception = assertThrows<UnsupportedOperationException> {
             messageService.handleMessageToGame(testConfig.testWebSocketGameSession, selectTrumpTestMessage)
         }
