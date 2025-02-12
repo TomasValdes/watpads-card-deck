@@ -168,12 +168,7 @@ class GameService(
             game.playerTwo.hand.add(game.currentDeck.removeLast())
         }
 
-        for (session in gameSessionManager.getSessions(game.gameId)!!){
-            val message = PlayerResponse(
-                hand = findPlayerInGame(game, session.userId).hand
-            )
-            session.sendObjectMessage(message)
-        }
+        sendHandToEachPlayer(game)
     }
 
     private fun evaluateMoves(game: Game){
@@ -204,13 +199,14 @@ class GameService(
             // Check if player hands need to be refilled
             if (playerOne.hand.size == 0 && playerTwo.hand.size == 0){
                 distributeHands(game)
+            } else{
+                sendHandToEachPlayer(game)
             }
-
-            game.gameState = GameStates.PlayingCards
-
 
             if (roundWinner != null)
                 handleRoundWinBonus(roundWinner, game)
+
+            game.gameState = GameStates.PlayingCards
             gameSessionManager.sendMessageToGame(game.gameId, GameResponse(game))
         }
     }
@@ -231,8 +227,17 @@ class GameService(
     }
 
     private fun handleRoundWinBonus(player: Player, game: Game){
-        val cardsToReveal = AddCardsRequest(game.currentDeck.takeLast(2))
-        gameSessionManager.sendMessageToPlayerInGame(game.gameId, player.playerId, cardsToReveal)
+        val cardsToReveal = RevealCardsResponse(game.currentDeck.takeLast(2))
+        gameSessionManager.sendMessageToPlayerInGame(game.gameId, player.user.userId, cardsToReveal)
+    }
+
+    private fun sendHandToEachPlayer(game: Game){
+        for (player in arrayOf(game.playerOne, game.playerTwo)) {
+            gameSessionManager.sendMessageToPlayerInGame(
+                game.gameId, player.user.userId,
+                PlayerResponse(player.hand)
+            )
+        }
     }
 
     private fun findPlayerInGame(game: Game, userId: Long): Player{
