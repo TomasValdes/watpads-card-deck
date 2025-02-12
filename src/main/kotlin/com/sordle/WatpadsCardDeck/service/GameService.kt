@@ -105,11 +105,10 @@ class GameService(
             player.cardsAddedToDeck.addAll(addCardsRequest.cardsToAdd)
             game.startingDeck.addAll(addCardsRequest.cardsToAdd)
         } else {
-            logger.warn("Cannot add cards $addCardsRequest in request by user $session.userId")
+            logger.warn("Cannot add cards $addCardsRequest in request by user ${session.userId}")
         }
 
         if (game.startingDeck.size >= numCardsInStartingDeck) {
-            game.currentDeck.addAll(game.startingDeck)
             distributeHands(game)
             game.gameState = GameStates.PlayingCards
             gameSessionManager.sendMessageToGame(game.gameId, GameResponse(game))
@@ -122,15 +121,16 @@ class GameService(
     fun playCard(session: WebSocketSession, playCardRequest: PlayCardRequest){
         val game = getGame(session.gameId)!!
         val player = findPlayerInGame(game, session.userId)
-        if (player.move == null){
+        if (player.move == null && player.hand.contains(playCardRequest.card)){
             player.hand.remove(playCardRequest.card)
             player.move = playCardRequest.card
+        } else{
+            logger.warn("Attempt to play card ${playCardRequest.card} by user ${session.userId} was ignored")
         }
 
         if (game.playerOne.move != null && game.playerTwo.move != null) {
             game.gameState = GameStates.RevealingCards
             gameSessionManager.sendMessageToGame(game.gameId, GameResponse(game))
-            gameRepository.save(game)
             evaluateMoves(game)
         }
     }
@@ -149,12 +149,23 @@ class GameService(
      * Shuffles deck then sends each player their new hand
      */
     private fun distributeHands(game: Game){
+        // Check that the deck is not empty
+        if (game.currentDeck.size - (fullHandSize * 2) <= 0){
+            val cardsToAddToTopOfDeck = game.currentDeck.toList()
+            game.currentDeck.clear()
+            game.currentDeck.addAll(game.startingDeck)
+            game.currentDeck.shuffle()
+            for (card in cardsToAddToTopOfDeck)
+                game.currentDeck.remove(card)
+            game.currentDeck.addAll(cardsToAddToTopOfDeck)
+        }
+
         game.currentDeck.shuffle()
 
         // Distribute cards to players
         for (i in 0 until fullHandSize) {
-            game.playerOne.hand.add(game.currentDeck.removeFirst())
-            game.playerTwo.hand.add(game.currentDeck.removeFirst())
+            game.playerOne.hand.add(game.currentDeck.removeLast())
+            game.playerTwo.hand.add(game.currentDeck.removeLast())
         }
 
         for (session in gameSessionManager.getSessions(game.gameId)!!){
@@ -168,31 +179,40 @@ class GameService(
     private fun evaluateMoves(game: Game){
         val playerOne = game.playerOne
         val playerTwo = game.playerTwo
+        val roundWinner: Player?
 
-        // Handle tie
-        if (playerOne.move == playerTwo.move) {
-            game.gameState = GameStates.PlayingCards
-            gameSessionManager.sendMessageToGame(game.gameId, GameResponse(game))
-        }
-        // Handle playerOne victory
-        else if (didPlayerOneWinRound(game)){
-            if (playerOne.move == playerOne.trumpCard){
-                handlePlayerVictory(playerOne, game)
-            } else {
-                
-            }
-        }
-        // Handle playerTwo victory
-        else {
-            if (playerTwo.move == playerTwo.trumpCard){
-                handlePlayerVictory(playerTwo, game)
-            } else{
+        // Handle player winning round if no tie
+        if (playerOne.move != playerTwo.move) {
+            roundWinner = if (didPlayerOneWinRound(game))
+                playerOne
+            else
+                playerTwo
 
+            if (roundWinner.move == roundWinner.trumpCard){
+                handlePlayerVictory(roundWinner, game)
             }
+        } else{
+            roundWinner = null
         }
+
 
         playerOne.move = null
         playerTwo.move = null
+
+        // Continue game if no winner was found
+        if(game.gameState != GameStates.GameResults){
+            // Check if player hands need to be refilled
+            if (playerOne.hand.size == 0 && playerTwo.hand.size == 0){
+                distributeHands(game)
+            }
+
+            game.gameState = GameStates.PlayingCards
+
+
+            if (roundWinner != null)
+                handleRoundWinBonus(roundWinner, game)
+            gameSessionManager.sendMessageToGame(game.gameId, GameResponse(game))
+        }
     }
 
     private fun didPlayerOneWinRound(game: Game): Boolean {
@@ -208,6 +228,11 @@ class GameService(
         game.gameState = GameStates.GameResults
         gameSessionManager.sendMessageToGame(game.gameId, GameResponse(game))
         gameSessionManager.endGameSessions(game.gameId)
+    }
+
+    private fun handleRoundWinBonus(player: Player, game: Game){
+        val cardsToReveal = AddCardsRequest(game.currentDeck.takeLast(2))
+        gameSessionManager.sendMessageToPlayerInGame(game.gameId, player.playerId, cardsToReveal)
     }
 
     private fun findPlayerInGame(game: Game, userId: Long): Player{
