@@ -33,7 +33,7 @@ enum class GameStates {
     RevealingCards,
 
     // display the results of the game
-    GameResults
+    Completed
 }
 
 /**
@@ -47,7 +47,7 @@ data class Game (
     var gameState: GameStates = GameStates.SelectingTrump,
 
     @ElementCollection
-    val startingDeck: MutableList<Cards> = mutableListOf(),
+    val startingDeck: MutableList<Cards> = mutableListOf(Cards.Rock, Cards.Scissors, Cards.Paper),
 
     @ElementCollection
     val currentDeck: MutableList<Cards> = mutableListOf(),
