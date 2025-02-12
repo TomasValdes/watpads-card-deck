@@ -6,7 +6,6 @@ import com.sordle.watpadsCardDeck.service.UserService
 import com.sordle.watpadsCardDeck.util.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.handler.TextWebSocketHandler
@@ -33,7 +32,6 @@ class GameWebSocketHandler(
     /**
      * Finds a game for given session then associates the session with the game
      */
-    @Transactional
     override fun afterConnectionEstablished(session: WebSocketSession) {
         /**
          * Temporary work around until security is implemented

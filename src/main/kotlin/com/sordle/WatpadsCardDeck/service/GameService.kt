@@ -10,11 +10,11 @@ import com.sordle.watpadsCardDeck.repository.GameRepository
 import com.sordle.watpadsCardDeck.util.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.socket.WebSocketSession
 
 @Service
+@Transactional
 class GameService(
     private val lobbyRepository: LobbyRepository,
     private val gameRepository: GameRepository,
@@ -31,7 +31,6 @@ class GameService(
      * Finds the oldest queued game waiting for a player or create one if it doesn't exist.
      * Joining game is accomplished through connecting to websocket with returned gameId
      */
-    @Transactional
     fun getGameToJoin() : Lobby{
         val openGames = lobbyRepository.findAllByOrderByCreatedDateAsc()
         return if (openGames.isEmpty()){
@@ -45,7 +44,6 @@ class GameService(
      * Inserts a player into a lobby after a successful websocket connection or
      * to a game if joining the lobby would cause it to be full
      */
-    @Transactional(propagation = Propagation.MANDATORY)
     fun joinGame(session: WebSocketSession){
         val lobby = getLobby(session.gameId)!!
         if (lobby.playerOne == null){
@@ -82,7 +80,6 @@ class GameService(
     /**
      * Sets the trump for a player in a game both gotten from the given session
      */
-    @Transactional(propagation = Propagation.MANDATORY)
     fun setTrump(session: WebSocketSession, playCardRequest: PlayCardRequest){
         val game = getGame(session.gameId)!!
         val player = findPlayerInGame(game, session.userId)
@@ -100,7 +97,6 @@ class GameService(
     /**
      * Adds given cards to starter deck for a game from the given session
      */
-    @Transactional(propagation = Propagation.MANDATORY)
     fun addCardsToDeck(session: WebSocketSession, addCardsRequest: AddCardsRequest){
         val game = getGame(session.gameId)!!
         val player = findPlayerInGame(game, session.userId)
@@ -123,7 +119,6 @@ class GameService(
     /**
      * Handles logic for playing given card for a player in a game both gotten from the given session
      */
-    @Transactional(propagation = Propagation.MANDATORY)
     fun playCard(session: WebSocketSession, playCardRequest: PlayCardRequest){
         val game = getGame(session.gameId)!!
         val player = findPlayerInGame(game, session.userId)
