@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from "react";
+import rockCard from './rockCard.png'
+import paperCard from './paperCard.png'
+import scissorsCard from './scissorsCard.png'
+
+
+import "./App.css"
 
 const Game = () => {
     const [ws, setWs] = useState(null);
     const [gameState, setGameState] = useState(null);
     const [hand, setHand] = useState([]);
+    const [selectedCards, setSelectedCards] = useState([]);
     const [gameId, setGameId] = useState(null);
     const [playerId, setPlayerId] = useState(null);
 
@@ -46,6 +53,17 @@ const Game = () => {
         sendMessage({ card });
     };
 
+    const addCardsToDeck = (card) => {
+        console.log(selectedCards)
+        if (selectedCards.length >= 3) return;
+
+        setSelectedCards([...selectedCards, card]);
+
+        if (selectedCards.length === 3) {
+            sendMessage({ cards: selectedCards});
+        }
+    }
+
     const playCard = (card) => {
         sendMessage({ card });
     };
@@ -58,11 +76,32 @@ const Game = () => {
                 <div>
                     <h2>Select a Trump Card</h2>
                     <button onClick={() => selectTrump("Rock")}>
-                        <img src={"../public/Rock Card.png"} alt={"Rock Card"}></img></button>
-                    <button onClick={() => selectTrump("Paper")}>Paper</button>
-                    <button onClick={() => selectTrump("Scissors")}>Scissors</button>
+                        <img className={"Card"} src={rockCard} alt={"Rock Card"}></img>
+                    </button>
+                    <button onClick={() => selectTrump("Paper")}>
+                        <img className={"Card"} src={paperCard} alt={"Paper Card"}></img>
+                    </button>
+                    <button onClick={() => selectTrump("Scissors")}>
+                        <img className={"Card"} src={scissorsCard} alt={"Scissors Card"}></img>
+                    </button>
                 </div>
             )}
+            {
+                gameState === "DraftingCards" && (
+                    <div>
+                        <h2>Select three cards to add to the deck</h2>
+                        <button onClick={() => addCardsToDeck("Rock")}>
+                            <img className={"Card"} src={rockCard} alt={"Rock Card"}></img>
+                        </button>
+                        <button onClick={() => addCardsToDeck("Paper")}>
+                            <img className={"Card"} src={paperCard} alt={"Paper Card"}></img>
+                        </button>
+                        <button onClick={() => addCardsToDeck("Scissors")}>
+                            <img className={"Card"} src={scissorsCard} alt={"Scissors Card"}></img>
+                        </button>
+                    </div>
+                )
+            }
             {gameState === "PlayingCards" && (
                 <div>
                     <h2>Your Hand</h2>
