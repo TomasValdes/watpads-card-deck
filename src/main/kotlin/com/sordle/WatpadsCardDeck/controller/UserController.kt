@@ -1,7 +1,7 @@
 package com.sordle.watpadsCardDeck.controller
 
-import com.sordle.watpadsCardDeck.entity.User
 import com.sordle.watpadsCardDeck.model.UserRequest
+import com.sordle.watpadsCardDeck.model.UserResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -21,8 +21,8 @@ class UserController(
 
 
     @GetMapping("/{userId}")
-    fun getUser( @PathVariable("userId") userId: Long): ResponseEntity<User> {
-        return ResponseEntity.ok(userService.getUser(userId))
+    fun getUser( @PathVariable("userId") userId: Long): ResponseEntity<UserResponse> {
+        return ResponseEntity.ok(UserResponse(userService.getUser(userId)))
     }
 
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
