@@ -54,6 +54,7 @@ const Game = () => {
     }, []);
 
     const sendMessage = (message) => {
+        console.log("Sent message: " + message);
         if (ws && ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify(message));
         }
@@ -64,14 +65,15 @@ const Game = () => {
     };
 
     const addCardsToDeck = (card) => {
-        console.log(selectedCards)
-        if (selectedCards.length >= 3) return;
+        setSelectedCards((prevCards) => {
+            const newCards = [...prevCards, card];
 
-        setSelectedCards([...selectedCards, card]);
+            if (newCards.length === 3) {
+                sendMessage({ card: newCards });
+            }
 
-        if (selectedCards.length === 3) {
-            sendMessage({ cards: selectedCards});
-        }
+            return newCards;
+        });
     }
 
     const playCard = (card) => {
