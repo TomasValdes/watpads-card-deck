@@ -1,5 +1,6 @@
 package com.sordle.watpadsCardDeck.controller
 
+import com.sordle.watpadsCardDeck.model.UserResponse
 import com.sordle.watpadsCardDeck.service.GameService
 import com.sordle.watpadsCardDeck.service.MessageService
 import com.sordle.watpadsCardDeck.service.UserService
@@ -38,14 +39,17 @@ class GameWebSocketHandler(
          * Currently, every session will create a new anonymous user
          */
         session.setUser(userService.createAnonymousUser())
-        session.setGame(gameService.getGameToJoin())
-        gameSessionManager.addSession(session.gameId, session)
+        session.sendObjectMessage(UserResponse(userService.getUser(session.userId)))
         gameService.joinGame(session)
         logger.info("User with session id ${session.id} connected")
     }
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
-        gameSessionManager.removeSession(session.gameId, session)
+        try {
+            gameSessionManager.removeSession(session.gameId, session)
+            gameService.removePlayerFromLobby(session)
+        } catch (_: NullPointerException) {
+        }
         logger.info("User with session id ${session.id} disconnected")
     }
 
