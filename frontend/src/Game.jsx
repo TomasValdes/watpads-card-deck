@@ -81,7 +81,13 @@ const Game = () => {
     return (
         <div>
             <h1>Rock-Paper-Scissors Game</h1>
+            <p>User Name: {userName}</p>
             <p>Game State: {gameState}</p>
+            {gameState === null && (
+                <div>
+                    <h1>Connecting to a game ⏱️</h1>
+                </div>
+            )}
             {gameState === "SelectingTrump" && (
                 <div>
                     <h2>Select a Trump Card</h2>
@@ -120,6 +126,11 @@ const Game = () => {
                             {card}
                         </button>
                     ))}
+                </div>
+            )}
+            {gameState === "Completed" && (
+                <div>
+                    <h2>{winnerId === userId ? "You win!" : "Better luck next time"}</h2>
                 </div>
             )}
         </div>
