@@ -12,7 +12,9 @@ const Game = () => {
     const [hand, setHand] = useState([]);
     const [selectedCards, setSelectedCards] = useState([]);
     const [gameId, setGameId] = useState(null);
-    const [playerId, setPlayerId] = useState(null);
+    const [userId, setUserId] = useState(null);
+    const [userName, setUserName] = useState(null);
+    const [winnerId, setWinner] = useState(null)
 
     useEffect(() => {
         const socket = new WebSocket("ws://localhost:8080/web/game");
@@ -25,10 +27,18 @@ const Game = () => {
             const data = JSON.parse(message.data);
             console.log("Received message:", data);
 
+            if (data.userId) {
+                setUserId(data.userId)
+                setUserName(data.userName)
+            }
+
             if (data.gameState) {
                 setGameState(data.gameState);
                 setGameId(data.gameId);
-                setPlayerId(data.playerOneUserId); // Assuming player is player one
+
+                if (data.winner){
+                    setWinner(data.winner)
+                }
             }
 
             if (data.hand) {
