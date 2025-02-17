@@ -16,8 +16,6 @@ class WebSocketConfig(
 
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
         registry.addHandler(gameWebSocketHandler, "/web/game")
-            // Interceptor to set initial session attributes, to be used for authorization later
-            .addInterceptors(HttpSessionHandshakeInterceptor())
             .setAllowedOrigins("http://localhost:3000")
     }
 }
