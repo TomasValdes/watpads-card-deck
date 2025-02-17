@@ -151,6 +151,21 @@ class GameService(
     }
 
     /**
+     * Removes given user from given lobby
+     */
+    fun removePlayerFromLobby(session: WebSocketSession){
+        val lobby = lobbyRepository.findLobbyByGameId(session.gameId)
+        if (lobby != null){
+            if (lobby.playerOne != null && lobby.playerOne!!.user.userId == session.userId){
+                lobby.playerOne = null
+            }
+            else if (lobby.playerTwo != null && lobby.playerTwo!!.user.userId == session.userId){
+                lobby.playerTwo = null
+            }
+        }
+    }
+
+    /**
      * Shuffles deck then sends each player their new hand
      */
     private fun distributeHands(game: Game){
