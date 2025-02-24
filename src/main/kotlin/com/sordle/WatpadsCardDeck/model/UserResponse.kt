@@ -9,7 +9,8 @@ data class UserResponse (
 
     @get:NotBlank
     val userName: String
-) {
+) : GenericResponse()
+{
     constructor(user : User) : this(
         userId = user.userId,
         userName = user.userName

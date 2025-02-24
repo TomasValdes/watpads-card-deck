@@ -7,4 +7,4 @@ package com.sordle.watpadsCardDeck.model
  */
 data class RevealCardsResponse (
     val revealedCards : List<Cards>
-)
+) : GenericResponse()

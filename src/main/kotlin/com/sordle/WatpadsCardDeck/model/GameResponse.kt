@@ -14,7 +14,8 @@ data class GameResponse (
     val playerOneMove: Cards?,
     val playerTwoMove: Cards?,
     val winner: Long?
-    ) {
+    ) : GenericResponse()
+{
     constructor(game: Game) : this(
         gameId = game.gameId,
         gameState = game.gameState,

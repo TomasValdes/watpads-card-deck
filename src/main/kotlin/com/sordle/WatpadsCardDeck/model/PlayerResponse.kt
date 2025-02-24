@@ -5,4 +5,4 @@ package com.sordle.watpadsCardDeck.model
  */
 data class PlayerResponse (
     val hand: MutableList<Cards> = mutableListOf()
-)
+) : GenericResponse()
