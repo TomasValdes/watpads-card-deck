@@ -13,15 +13,36 @@
   }
 }
 
-.App-header {
-  background-color: #282c34;
+.Game{
+  color: white;
+  font-size: calc(10px + 2vmin);
   min-height: 100vh;
+}
+
+.Game-header{
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+h2.Game-header{
+  text-align: left;
+  font-size: calc(5px + 2vmin);
+}
+
+img.Game-header{
+  display: block;
+  vertical-align: center;
+  height: 100px;
+  width: 66px;
+}
+
+.Game-body {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
 .App-link {
