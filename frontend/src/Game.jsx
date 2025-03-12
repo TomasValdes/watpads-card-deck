@@ -46,7 +46,7 @@ const Game = () => {
         </button>
     );
 
-    const GameBoard = ({text, cards}) => (
+    const FormatGameBoard = ({text, cards}) => (
         <div>
             <h2>
                 {text}
@@ -156,6 +156,54 @@ const Game = () => {
         sendMessage({card});
     };
 
+    const GameBoard = () => {
+        switch (gameState) {
+            case null:
+                return (
+                    <div>
+                        <h1>Connecting to a game ⏱️</h1>
+                    </div>
+                )
+            case GameStates.SELECTING_TRUMP:
+                return (
+                    <FormatGameBoard
+                        text={!trumpCard ? "Select a trump card" : "Waiting for opponent"}
+                        cards={Object.keys(cardTypes).map((cardName) => (
+                            <CardButton key={cardName} cardName={cardName} onClick={selectTrump}/>
+                        ))}
+                    />
+                )
+            case GameStates.DRAFTING_CARDS:
+                return (
+                    <FormatGameBoard
+                        text={selectedCards.length < 3 ? "Select three cards to add to the deck"
+                            : "Waiting for opponent"}
+                        cards={Object.keys(cardTypes).map((cardName) => (
+                            <CardButton key={cardName} cardName={cardName} onClick={addCardsToDeck}/>
+                        ))}
+                    />
+                )
+            case GameStates.REVEALING_CARDS:
+            case isMoveBeingRevealed:
+                return (<RoundReveal/>)
+            case GameStates.PLAYING_CARDS:
+                return (
+                    <FormatGameBoard
+                        text={"Your Hand"}
+                        cards={hand.map((cardName, index) => (
+                            <CardButton key={index} cardName={cardName} onClick={playCard}/>
+                        ))}
+                    />
+                )
+            case GameStates.COMPLETED:
+                return (
+                    <div>
+                        <h2>{winnerId === userId ? "You win!" : "Better luck next time"}</h2>
+                    </div>
+                )
+        }
+    }
+
     return (
         <div className="Game">
             <header className="Game-header">
@@ -163,7 +211,11 @@ const Game = () => {
                 {trumpCard &&
                     <img className="Game-header" src={cardTypes[trumpCard]} alt={`${trumpCard} Card`}/>
                 }
-                <h2 className="Game-header">Revealed Cards:</h2>
+
+                {revealedCards &&
+                    <h2 className="Game-header">Revealed Cards:</h2>
+                }
+
                 {revealedCards && (
                     revealedCards.map((cardName, index) => (
                         <img key={index} className="Game-header" src={cardTypes[cardName]} alt={`${cardName} Card`}/>
@@ -172,44 +224,7 @@ const Game = () => {
                 }
             </header>
             <div className="Game-body">
-                {gameState === null && (
-                    <div>
-                        <h1>Connecting to a game ⏱️</h1>
-                    </div>
-                )}
-                {gameState === GameStates.SELECTING_TRUMP && (
-                    <GameBoard
-                        text={!trumpCard ? "Select a trump card" : "Waiting for opponent"}
-                        cards={Object.keys(cardTypes).map((cardName) => (
-                            <CardButton key={cardName} cardName={cardName} onClick={selectTrump}/>
-                        ))}
-                    />
-                )}
-                {gameState === GameStates.DRAFTING_CARDS && (
-                    <GameBoard
-                        text={selectedCards.length < 3 ? "Select three cards to add to the deck"
-                            : "Waiting for opponent"}
-                        cards={Object.keys(cardTypes).map((cardName) => (
-                            <CardButton key={cardName} cardName={cardName} onClick={addCardsToDeck}/>
-                        ))}
-                    />
-                )}
-                {(gameState === GameStates.REVEALING_CARDS || isMoveBeingRevealed) && (
-                    <RoundReveal/>
-                )}
-                {gameState === GameStates.PLAYING_CARDS && (
-                    <GameBoard
-                        text={"Your Hand"}
-                        cards={hand.map((cardName, index) => (
-                            <CardButton key={index} cardName={cardName} onClick={playCard}/>
-                        ))}
-                    />
-                )}
-                {gameState === GameStates.COMPLETED && (
-                    <div>
-                        <h2>{winnerId === userId ? "You win!" : "Better luck next time"}</h2>
-                    </div>
-                )}
+                <GameBoard/>
             </div>
         </div>
     );
