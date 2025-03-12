@@ -19,24 +19,25 @@ const Game = () => {
     const [trumpCard, setTrumpCard] = useState(null);
     const [selfMove, setSelfMove] = useState();
     const [opponentMove, setOpponentMove] = useState();
+    const [isMoveBeingRevealed, setIsMoveBeingRevealed] = useState(false);
     const cardTypes = {
         Rock: rockCard,
         Paper: paperCard,
         Scissors: scissorsCard
     };
     const GameStates = Object.freeze({
-        SELECTING_TRUMP: Symbol("SelectingTrump"),
-        DRAFTING_CARDS: Symbol("DraftingCards"),
-        PLAYING_CARDS: Symbol("PlayingCards"),
-        REVEALING_CARDS: Symbol("RevealingCards"),
-        COMPLETED: Symbol("Completed")
+        SELECTING_TRUMP: "SelectingTrump",
+        DRAFTING_CARDS: "DraftingCards",
+        PLAYING_CARDS: "PlayingCards",
+        REVEALING_CARDS: "RevealingCards",
+        COMPLETED: "Completed"
     });
 
     const ResponseTypes = Object.freeze({
-        GAME: Symbol("GameResponse"),
-        PLAYER: Symbol("PlayerResponse"),
-        REVEAL: Symbol("RevealCardsResponse"),
-        USER: Symbol("UserResponse"),
+        GAME: "GameResponse",
+        PLAYER: "PlayerResponse",
+        REVEAL: "RevealCardsResponse",
+        USER: "UserResponse",
     });
 
     const CardButton = ({cardName, onClick}) => (
@@ -44,6 +45,32 @@ const Game = () => {
             <img className="Card" src={cardTypes[cardName]} alt={`${cardName} Card`}/>
         </button>
     );
+
+    const GameBoard = ({text, cards}) => (
+        <div>
+            <h2>
+                {text}
+            </h2>
+            {cards}
+        </div>
+    );
+
+    const RoundReveal = () => {
+        setIsMoveBeingRevealed(true);
+        setTimeout(
+            () => {
+                setIsMoveBeingRevealed(false)
+            }, 4000);
+
+        return (
+            <div>
+                <img className="Card" style={{rotate: '90'}} src={cardTypes[opponentMove]}
+                     alt={`Opponent played ${opponentMove}`}/>
+                <br/>
+                <img className="Card" src={cardTypes[selfMove]} alt={`I played ${selfMove}`}/>
+            </div>
+        )
+    };
 
     useEffect(() => {
         const socket = new WebSocket("ws://localhost:8080/web/game");
@@ -56,8 +83,7 @@ const Game = () => {
             const data = JSON.parse(message.data);
             console.log("Received message:", data);
 
-
-            switch (data.responseType){
+            switch (data.responseType) {
                 case ResponseTypes.USER:
                     setUserId(data.userId)
                     setUserName(data.userName)
@@ -69,15 +95,14 @@ const Game = () => {
                     if (data.winner) {
                         setWinner(data.winner)
                     }
-
                     /**
                      * Make sure correct move is attributed to correct player
                      */
-                    if (data.gameState === GameStates.REVEALING_CARDS){
-                        if (data.playerOneUserId === userId){
+                    if (data.gameState === GameStates.REVEALING_CARDS) {
+                        if (data.playerOneUserId === userId) {
                             setSelfMove(data.playerOneMove);
                             setOpponentMove(data.playerTwoMove);
-                        } else{
+                        } else {
                             setSelfMove(data.playerTwoMove);
                             setOpponentMove(data.playerOneMove);
                         }
@@ -85,6 +110,12 @@ const Game = () => {
                     break;
                 case ResponseTypes.PLAYER:
                     setHand(data.hand);
+                    break;
+                case ResponseTypes.REVEAL:
+                    setRevealedCards(data.revealedCards);
+                    break;
+                default:
+                    break;
             }
         };
 
@@ -119,62 +150,60 @@ const Game = () => {
 
             return newCards;
         });
-    }
+    };
 
     const playCard = (card) => {
         sendMessage({card});
     };
 
     return (
-        <div>
-            <p style={{textAlign: 'left'}}>Trump Card:
+        <div className="Game">
+            <header className="Game-header">
+                <h2 className="Game-header">Trump Card:</h2>
                 {trumpCard &&
-                    <img className="Card" src={cardTypes[trumpCard]} alt={`${trumpCard} Card`}/>
+                    <img className="Game-header" src={cardTypes[trumpCard]} alt={`${trumpCard} Card`}/>
                 }
-            </p>
+                <h2 className="Game-header">Revealed Cards:</h2>
+                {revealedCards && (
+                    revealedCards.map((cardName, index) => (
+                        <img key={index} className="Game-header" src={cardTypes[cardName]} alt={`${cardName} Card`}/>
+                    ))
+                )
+                }
+            </header>
             <div className="Game-body">
-                <h1>Rock-Paper-Scissors Game</h1>
-                <p>Game State: {gameState}</p>
-                <p>User Name: {userName}</p>
-                <p>Cards revealed from deck: {revealedCards}</p>
                 {gameState === null && (
                     <div>
                         <h1>Connecting to a game ⏱️</h1>
                     </div>
                 )}
                 {gameState === GameStates.SELECTING_TRUMP && (
-                    <div>
-                        <h2>{!trumpCard ? "Select a trump card"
-                            : "Waiting for opponent"}
-                        </h2>
-                        {Object.keys(cardTypes).map((cardName) => (
+                    <GameBoard
+                        text={!trumpCard ? "Select a trump card" : "Waiting for opponent"}
+                        cards={Object.keys(cardTypes).map((cardName) => (
                             <CardButton key={cardName} cardName={cardName} onClick={selectTrump}/>
                         ))}
-                    </div>
+                    />
                 )}
                 {gameState === GameStates.DRAFTING_CARDS && (
-                    <div>
-                        <h2>{selectedCards.length < 3 ? "Select three cards to add to the deck"
+                    <GameBoard
+                        text={selectedCards.length < 3 ? "Select three cards to add to the deck"
                             : "Waiting for opponent"}
-                        </h2>
-                        {Object.keys(cardTypes).map((cardName) => (
+                        cards={Object.keys(cardTypes).map((cardName) => (
                             <CardButton key={cardName} cardName={cardName} onClick={addCardsToDeck}/>
                         ))}
-                    </div>
-                )
-                }
+                    />
+                )}
+                {(gameState === GameStates.REVEALING_CARDS || isMoveBeingRevealed) && (
+                    <RoundReveal/>
+                )}
                 {gameState === GameStates.PLAYING_CARDS && (
-                    <div>
-                        <h2>Your Hand</h2>
-                        {hand.map((cardName, index) => (
+                    <GameBoard
+                        text={"Your Hand"}
+                        cards={hand.map((cardName, index) => (
                             <CardButton key={index} cardName={cardName} onClick={playCard}/>
                         ))}
-                    </div>
-                )}
-                {gameState === GameStates.REVEALING_CARDS && (
-                    <div>
-                        {revealPlays()}
-                    </div>
+                    />
                 )}
                 {gameState === GameStates.COMPLETED && (
                     <div>
