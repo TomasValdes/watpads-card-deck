@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import rockCard from './rockCard.png'
 import paperCard from './paperCard.png'
 import scissorsCard from './scissorsCard.png'
@@ -7,19 +7,20 @@ import scissorsCard from './scissorsCard.png'
 import "./App.css"
 
 const Game = () => {
+    const gameId = useRef(null);
+    const userId = useRef(null);
+    const winnerId = useRef(null)
     const [ws, setWs] = useState(null);
     const [gameState, setGameState] = useState(null);
     const [hand, setHand] = useState([]);
     const [selectedCards, setSelectedCards] = useState([]);
-    const [gameId, setGameId] = useState(null);
-    const [userId, setUserId] = useState(null);
     const [userName, setUserName] = useState(null);
-    const [winnerId, setWinner] = useState(null)
     const [revealedCards, setRevealedCards] = useState(null);
     const [trumpCard, setTrumpCard] = useState(null);
     const [selfMove, setSelfMove] = useState();
     const [opponentMove, setOpponentMove] = useState();
     const [isMoveBeingRevealed, setIsMoveBeingRevealed] = useState(false);
+    const [isCardButtonDisabled, setIsCardButtonDisabled] = useState(false);
     const cardTypes = {
         Rock: rockCard,
         Paper: paperCard,
@@ -41,7 +42,7 @@ const Game = () => {
     });
 
     const CardButton = ({cardName, onClick}) => (
-        <button onClick={() => onClick(cardName)}>
+        <button className="Card-button" onClick={() => onClick(cardName)} disabled={isCardButtonDisabled}>
             <img className="Card" src={cardTypes[cardName]} alt={`${cardName} Card`}/>
         </button>
     );
@@ -56,7 +57,6 @@ const Game = () => {
     );
 
     const RoundReveal = () => {
-        setIsMoveBeingRevealed(true);
         setTimeout(
             () => {
                 setIsMoveBeingRevealed(false)
@@ -65,7 +65,7 @@ const Game = () => {
         return (
             <div>
                 <img className="Card" style={{rotate: '90'}} src={cardTypes[opponentMove]}
-                     alt={`Opponent played ${opponentMove}`}/>
+                     alt={`Opponent playe d ${opponentMove}`}/>
                 <br/>
                 <img className="Card" src={cardTypes[selfMove]} alt={`I played ${selfMove}`}/>
             </div>
@@ -85,21 +85,26 @@ const Game = () => {
 
             switch (data.responseType) {
                 case ResponseTypes.USER:
-                    setUserId(data.userId)
-                    setUserName(data.userName)
+                    userId.current = data.userId;
+                    setUserName(data.userName);
                     break;
                 case ResponseTypes.GAME:
+                    setIsCardButtonDisabled(false);
                     setGameState(data.gameState);
-                    setGameId(data.gameId);
+                    gameId.current = data.gameId;
 
-                    if (data.winner) {
-                        setWinner(data.winner)
+                    /**
+                     * Assign the games winner
+                     */
+                    if (data.gameState === GameStates.COMPLETED) {
+                        winnerId.current = data.winner;
                     }
                     /**
-                     * Make sure correct move is attributed to correct player
+                     * Make sure correct move is attributed to correct player and set gameboard to revealing state
                      */
                     if (data.gameState === GameStates.REVEALING_CARDS) {
-                        if (data.playerOneUserId === userId) {
+                        setIsMoveBeingRevealed(true);
+                        if (data.playerOneUserId === userId.current) {
                             setSelfMove(data.playerOneMove);
                             setOpponentMove(data.playerTwoMove);
                         } else {
@@ -135,7 +140,8 @@ const Game = () => {
 
     const selectTrump = (card) => {
         if (!trumpCard) {
-            setTrumpCard(card)
+            setIsCardButtonDisabled(true);
+            setTrumpCard(card);
             sendMessage({card});
         }
     };
@@ -145,6 +151,7 @@ const Game = () => {
             const newCards = [...prevCards, card];
 
             if (newCards.length === 3) {
+                setIsCardButtonDisabled(true);
                 sendMessage({card: newCards});
             }
 
@@ -153,10 +160,18 @@ const Game = () => {
     };
 
     const playCard = (card) => {
+        setIsCardButtonDisabled(true);
         sendMessage({card});
     };
 
     const GameBoard = () => {
+        /**
+         * Don't want the board to update while the results of a round are being shown to players
+         */
+        if (isMoveBeingRevealed){
+            return (<RoundReveal/>);
+        }
+
         switch (gameState) {
             case null:
                 return (
@@ -184,8 +199,7 @@ const Game = () => {
                     />
                 )
             case GameStates.REVEALING_CARDS:
-            case isMoveBeingRevealed:
-                return (<RoundReveal/>)
+                return (<RoundReveal/>);
             case GameStates.PLAYING_CARDS:
                 return (
                     <FormatGameBoard
@@ -198,7 +212,7 @@ const Game = () => {
             case GameStates.COMPLETED:
                 return (
                     <div>
-                        <h2>{winnerId === userId ? "You win!" : "Better luck next time"}</h2>
+                        <h2>{winnerId.current === userId.current ? "You win!" : "Better luck next time"}</h2>
                     </div>
                 )
         }
